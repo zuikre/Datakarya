@@ -1740,6 +1740,29 @@ Main Layout & Structure
   }
 }
 
+.tab-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+}
+
+.tab-loading i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.tab-loading p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.algorithm-detail .tab-pane {
+  min-height: 300px;
+}
+
 /* ==================== */
 /* RESPONSIVE ADJUSTMENTS */
 /* ==================== */
@@ -4657,3 +4680,4 @@ code {
   margin-top: var(--space-lg);
   justify-content: flex-end;
 }
+

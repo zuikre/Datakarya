@@ -957,6 +957,10 @@ function handleSearchClick() {
  * Show algorithm detail view
  * @param {string} algorithmId - ID of algorithm to show
  */
+/**
+ * Show algorithm detail view
+ * @param {string} algorithmId - ID of algorithm to show
+ */
 function showAlgorithmDetail(algorithmId) {
   // Prevent default if coming from click event
   if (typeof event !== 'undefined') {
@@ -989,29 +993,46 @@ function showAlgorithmDetail(algorithmId) {
   });
 
   // Show and scroll to selected detail
-  const detailToShow = document.getElementById(`${algorithmId}-detail`);
-  if (detailToShow) {
+  if (detailElement) {
     // Store scroll position
     STATE.preDetailScrollPosition = window.scrollY;
 
-    detailToShow.style.display = 'block';
-    detailToShow.classList.add('active');
+    detailElement.style.display = 'block';
+    detailElement.classList.add('active');
     document.body.classList.add('detail-view-active');
+
+    // Ensure concept tab is active and visible, others are hidden
+    const conceptTab = detailElement.querySelector('#concept-tab');
+    const otherTabs = detailElement.querySelectorAll('.tab-pane:not(#concept-tab)');
+    
+    if (conceptTab) {
+      conceptTab.style.display = 'block';
+      conceptTab.classList.add('active');
+    }
+    
+    otherTabs.forEach(tab => {
+      tab.style.display = 'none';
+      tab.classList.remove('active');
+    });
+
+    // Set active tab button
+    const tabButtons = detailElement.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.tab === 'concept') {
+        btn.classList.add('active');
+      }
+    });
 
     // Smooth scroll to it after render
     setTimeout(() => {
-      detailToShow.scrollIntoView({
+      detailElement.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
       // Ensure the detail is focused for accessibility
-      detailToShow.focus();
+      detailElement.focus();
     }, 100);
-
-    // Initialize visualizer if available
-    if (typeof window.initVisualizer === 'function') {
-      window.initVisualizer(algorithmId);
-    }
 
     // Track user viewing the algorithm
     trackAlgorithmView(algorithmId);
@@ -1101,6 +1122,10 @@ function addCopyButton(container) {
  * Handle tab switching in algorithm details
  * @param {Event} e - Click event
  */
+/**
+ * Handle tab switching in algorithm details
+ * @param {Event} e - Click event
+ */
 function handleTabSwitch(e) {
   const tabName = e.target.dataset.tab;
   const tabContainer = e.target.closest('.content-tabs');
@@ -1111,20 +1136,37 @@ function handleTabSwitch(e) {
   });
   e.target.classList.add('active');
   
-  // Update active tab content
+  // Update active tab content - hide all, then show the selected one
   tabContainer.querySelectorAll('.tab-pane').forEach((pane) => {
     pane.classList.remove('active');
-    if (pane.id === `${tabName}-tab`) {
-      pane.classList.add('active');
-    }
+    pane.style.display = 'none';
   });
+  
+  const activePane = tabContainer.querySelector(`#${tabName}-tab`);
+  if (activePane) {
+    activePane.style.display = 'block';
+    activePane.classList.add('active');
+  }
   
   // Update state
   STATE.currentTab = tabName;
   
   // Initialize visualizations if needed
   if (tabName === 'visualization' && typeof window.initVisualizer === 'function') {
-    window.initVisualizer(STATE.currentAlgorithm);
+    // Small delay to ensure the tab is visible before initializing
+    setTimeout(() => {
+      window.initVisualizer(STATE.currentAlgorithm);
+    }, 100);
+  }
+  
+  // Apply syntax highlighting for code tab
+  if (tabName === 'code' && window.hljs) {
+    setTimeout(() => {
+      const codeBlocks = activePane.querySelectorAll('pre code');
+      codeBlocks.forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    }, 100);
   }
 }
 
@@ -1236,6 +1278,9 @@ function generateAlgorithmCards() {
 /**
  * Generate algorithm detail sections
  */
+/**
+ * Generate algorithm detail sections
+ */
 function generateAlgorithmDetails() {
   if (!DOM.algorithmDetailsContainer) return;
   
@@ -1253,8 +1298,27 @@ function generateAlgorithmDetails() {
     
     DOM.algorithmDetailsContainer.appendChild(detailSection);
   });
+  
+  // After generating, ensure only concept tab is visible in each detail section
+  document.querySelectorAll('.algorithm-detail').forEach(detail => {
+    const conceptTab = detail.querySelector('#concept-tab');
+    const otherTabs = detail.querySelectorAll('.tab-pane:not(#concept-tab)');
+    
+    if (conceptTab) {
+      conceptTab.classList.add('active');
+    }
+    
+    otherTabs.forEach(tab => {
+      tab.classList.remove('active');
+    });
+  });
 }
 
+/**
+ * Generate HTML for algorithm detail section
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
 /**
  * Generate HTML for algorithm detail section
  * @param {Object} algorithm - Algorithm data
@@ -1287,14 +1351,14 @@ function generateAlgorithmDetailHTML(algorithm) {
     <div class="detail-content">
       <div class="content-tabs">
         <div class="tabs-header">
-          <button class="tab-btn active" data-tab="visualization">
-            <i class="fas fa-eye"></i> Visualization
-          </button>
-          <button class="tab-btn" data-tab="concept">
+          <button class="tab-btn active" data-tab="concept">
             <i class="fas fa-lightbulb"></i> Concept
           </button>
           <button class="tab-btn" data-tab="code">
             <i class="fas fa-code"></i> Implementation
+          </button>
+          <button class="tab-btn" data-tab="visualization">
+            <i class="fas fa-eye"></i> Visualization
           </button>
           <button class="tab-btn" data-tab="proscons">
             <i class="fas fa-balance-scale"></i> Pros & Cons
@@ -1311,9 +1375,10 @@ function generateAlgorithmDetailHTML(algorithm) {
         </div>
         
         <div class="tabs-content">
-          ${generateVisualizationTab(algorithm)}
+          <!-- Generate ALL tabs but only show concept initially -->
           ${generateConceptTab(algorithm)}
           ${generateCodeTab(algorithm)}
+          ${generateVisualizationTab(algorithm)}
           ${generateProsConsTab(algorithm)}
           ${generateUsesTab(algorithm)}
           ${generateQuizTab(algorithm)}
@@ -1341,275 +1406,6 @@ function generateAlgorithmDetailHTML(algorithm) {
   `;
 }
 
-/**
- * Generate visualization tab content
- * @param {Object} algorithm - Algorithm data
- * @return {string} - Generated HTML
- */
-// ✅ Safe version with fallback if visualization or parameters are missing
-// Updated functions for main.js
-
-function generateVisualizationTab(algorithm) {
-  const visualization = algorithm.visualization || {};
-  
-  // Default visualization parameters from visualization.js
-  const defaultParams = {
-    interactive: true,
-    show_grid: true,
-    show_axes: true,
-    animation_duration: 1500
-  };
-  
-  // Merge with algorithm-specific visualization parameters
-  const visualizationParams = {
-    ...defaultParams,
-    ...(visualization.parameters || {})
-  };
-  
-  return `
-    <div class="tab-pane active" id="visualization-tab">
-      <div class="visualization-container">
-        <!-- Dynamic controls container - will be populated by the visualizer -->
-        <div class="visualization-controls-dynamic" id="${algorithm.id}-controls">
-          <!-- Loading message for controls -->
-          <div class="controls-loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading interactive controls...</p>
-          </div>
-        </div>
-
-        <!-- Visualization canvas - will be populated by the visualizer -->
-        <div class="visualization-canvas" id="${algorithm.id}-visualization">
-          <div class="visualization-loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading interactive visualization...</p>
-          </div>
-        </div>
-
-        <!-- Common action buttons for all visualizations -->
-        <div class="visualization-actions">
-          <div class="action-buttons">
-            <button class="btn-secondary reset-visualization" data-algorithm="${algorithm.id}">
-              <i class="fas fa-redo"></i> Reset
-            </button>
-            <button class="btn-primary animate-visualization" data-algorithm="${algorithm.id}">
-              <i class="fas fa-play"></i> Restart Animation
-            </button>
-            
-            <!-- Dynamic visualization type selector if multiple types are available -->
-            ${visualization.types && visualization.types.length > 1 ? `
-              <select class="visualization-type-selector" data-algorithm="${algorithm.id}">
-                ${visualization.types.map(type => `
-                  <option value="${type.value}" ${type.default ? 'selected' : ''}>
-                    ${type.label}
-                  </option>
-                `).join('')}
-              </select>
-            ` : ''}
-            
-            <!-- Toggle buttons for common visualization features -->
-            <div class="visualization-toggles">
-              <button class="btn-toggle ${visualizationParams.show_grid ? 'active' : ''}" 
-                data-algorithm="${algorithm.id}" data-param="show_grid" 
-                title="Toggle Grid">
-                <i class="fas fa-border-style"></i>
-              </button>
-              <button class="btn-toggle ${visualizationParams.show_axes ? 'active' : ''}" 
-                data-algorithm="${algorithm.id}" data-param="show_axes" 
-                title="Toggle Axes">
-                <i class="fas fa-crosshairs"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Information section with description and instructions -->
-        <div class="visualization-info">
-          <div class="visualization-description">
-            <h4>${algorithm.title} Visualization</h4>
-            <p>${visualization.description || `Interact with the visualization to understand how ${algorithm.title} works.`}</p>
-          </div>
-          
-          ${visualization.instructions ? `
-            <div class="visualization-instructions">
-              <h5><i class="fas fa-lightbulb"></i> How to Use:</h5>
-              <ul>
-                ${visualization.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
-              </ul>
-            </div>
-          ` : ''}
-          
-          ${visualization.performanceTips ? `
-            <div class="visualization-tips">
-              <h5><i class="fas fa-info-circle"></i> Performance Tips:</h5>
-              <ul>
-                ${visualization.performanceTips.map(tip => `<li>${tip}</li>`).join('')}
-              </ul>
-            </div>
-          ` : ''}
-          
-          <!-- Dynamic parameters display -->
-          <div class="visualization-parameters">
-            <h5><i class="fas fa-sliders-h"></i> Current Parameters:</h5>
-            <div id="${algorithm.id}-params-display">
-              <!-- Will be populated with current parameters by the visualizer -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// Enhanced initVisualizer function
-window.initVisualizer = function(algorithmId) {
-  // Add safety check for undefined algorithmId
-  if (!algorithmId) {
-    console.warn('initVisualizer called without algorithm ID');
-    return;
-  }
-  
-  const algorithm = ALGORITHMS?.find(a => a.id === algorithmId);
-  if (!algorithm || !algorithm.visualization) {
-    console.warn('No visualization configuration found for algorithm:', algorithmId);
-    showVisualizationError(`${algorithmId}-visualization`, 'No visualization available for this algorithm');
-    return;
-  }
-  
-  const visualization = algorithm.visualization;
-  const containerId = `${algorithmId}-visualization`;
-  const controlsContainerId = `${algorithmId}-controls`;
-  
-  // Remove loading indicator
-  const loadingElement = document.querySelector(`#${containerId} .visualization-loading`);
-  if (loadingElement) {
-    loadingElement.style.display = 'none';
-  }
-  
-  // Get visualization configuration
-  const visualizationType = visualization.defaultType || 'default';
-  const params = {
-    ...visualization.parameters,
-    interactive: true, // Always enable interactive mode
-    controlsContainer: controlsContainerId // Tell visualizer where to put controls
-  };
-  
-  // Get the visualizer function using the visualizerKey
-  const visualizerFn = window.visualizers[visualization.visualizerKey];
-  if (visualizerFn) {
-    try {
-      visualizerFn(containerId, visualizationType, params);
-      setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, params);
-    } catch (error) {
-      console.error('Error initializing visualizer:', error);
-      showVisualizationError(containerId, error.message);
-    }
-  } else {
-    console.warn('No visualizer function found for key:', visualization.visualizerKey);
-    showVisualizationError(containerId, `Visualizer "${visualization.visualizerKey}" not found`);
-  }
-};
-
-// Enhanced event handler setup
-function setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, baseParams) {
-  const visualization = algorithm.visualization;
-  
-  // Reset button handler
-  const resetBtn = document.querySelector(`.reset-visualization[data-algorithm="${algorithmId}"]`);
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      // Clear the canvas and reinitialize
-      const canvas = document.querySelector(`#${containerId} canvas`);
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-      
-      // Clear controls container
-      const controlsContainer = document.getElementById(`${algorithmId}-controls`);
-      if (controlsContainer) {
-        controlsContainer.innerHTML = '';
-      }
-      
-      // Reinitialize with default parameters
-      const defaultParams = {
-        ...visualization.parameters,
-        interactive: true,
-        controlsContainer: `${algorithmId}-controls`
-      };
-      
-      visualizerFn(containerId, visualization.defaultType, defaultParams);
-    });
-  }
-  
-  // Animate button handler
-  const animateBtn = document.querySelector(`.animate-visualization[data-algorithm="${algorithmId}"]`);
-  if (animateBtn) {
-    animateBtn.addEventListener('click', () => {
-      // Get current parameters from controls if they exist
-      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
-      visualizerFn(containerId, getCurrentVisualizationType(algorithmId, visualization), currentParams);
-    });
-  }
-  
-  // Visualization type selector handler
-  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
-  if (typeSelector) {
-    typeSelector.addEventListener('change', (e) => {
-      const newType = e.target.value;
-      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
-      visualizerFn(containerId, newType, currentParams);
-    });
-  }
-}
-
-// Helper function to get current visualization parameters
-function getCurrentVisualizationParams(algorithmId, baseParams) {
-  // This would extract current values from the dynamic controls
-  // For now, return the base params
-  return {
-    ...baseParams,
-    forceRestart: true
-  };
-}
-
-// Helper function to get current visualization type
-function getCurrentVisualizationType(algorithmId, visualization) {
-  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
-  return typeSelector ? typeSelector.value : visualization.defaultType;
-}
-
-// Enhanced error display
-function showVisualizationError(containerId, message) {
-  const container = document.getElementById(containerId);
-  if (container) {
-    container.innerHTML = `
-      <div class="visualization-error">
-        <div class="error-icon">
-          <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <div class="error-content">
-          <h4>Visualization Unavailable</h4>
-          <p>${message}</p>
-          <small>Please check the console for technical details.</small>
-        </div>
-      </div>
-    `;
-  }
-}
-
-// Function to initialize all visualizations (if needed)
-function initializeVisualization(algorithmId) {
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => initVisualizer(algorithmId), 100);
-    });
-  } else {
-    setTimeout(() => initVisualizer(algorithmId), 100);
-  }
-}
-
 
 /**
  * Generate concept tab content
@@ -1618,7 +1414,7 @@ function initializeVisualization(algorithmId) {
  */
 function generateConceptTab(algorithm) {
   return `
-    <div class="tab-pane" id="concept-tab">
+    <div class="tab-pane active" id="concept-tab">
       <div class="concept-container">
         <div class="concept-intro">
           <h4>Core Concept</h4>
@@ -1897,6 +1693,302 @@ function generateCodeTab(algorithm) {
       </div>
     </div>
   `;
+}
+
+// Clipboard copy logic
+document.addEventListener('click', function (e) {
+  if (e.target.closest('.copy-code')) {
+    const codeContainer = e.target.closest('.code-tab-container');
+    if (!codeContainer) return;
+
+    // Find the active code block inside the same container
+    const activeCodeBlock = codeContainer.querySelector('.code-block.active code');
+    if (!activeCodeBlock) return;
+
+    // Get code text
+    const codeText = activeCodeBlock.innerText;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(codeText).then(() => {
+      // Feedback to user
+      const btn = e.target.closest('.copy-code');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => (btn.innerHTML = original), 2000);
+    }).catch(err => {
+      console.error('Failed to copy code: ', err);
+    });
+  }
+});
+
+
+/**
+ * Generate visualization tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+// ✅ Safe version with fallback if visualization or parameters are missing
+// Updated functions for main.js
+
+function generateVisualizationTab(algorithm) {
+  const visualization = algorithm.visualization || {};
+  
+  // Default visualization parameters from visualization.js
+  const defaultParams = {
+    interactive: true,
+    show_grid: true,
+    show_axes: true,
+    animation_duration: 1500
+  };
+  
+  // Merge with algorithm-specific visualization parameters
+  const visualizationParams = {
+    ...defaultParams,
+    ...(visualization.parameters || {})
+  };
+  
+  return `
+    <div class="tab-pane" id="visualization-tab">
+      <div class="visualization-container">
+        <!-- Dynamic controls container - will be populated by the visualizer -->
+        <div class="visualization-controls-dynamic" id="${algorithm.id}-controls">
+          <!-- Loading message for controls -->
+          <div class="controls-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading interactive controls...</p>
+          </div>
+        </div>
+
+        <!-- Visualization canvas - will be populated by the visualizer -->
+        <div class="visualization-canvas" id="${algorithm.id}-visualization">
+          <div class="visualization-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading interactive visualization...</p>
+          </div>
+        </div>
+
+        <!-- Common action buttons for all visualizations -->
+        <div class="visualization-actions">
+          <div class="action-buttons">
+            <button class="btn-secondary reset-visualization" data-algorithm="${algorithm.id}">
+              <i class="fas fa-redo"></i> Reset
+            </button>
+            <button class="btn-primary animate-visualization" data-algorithm="${algorithm.id}">
+              <i class="fas fa-play"></i> Restart Animation
+            </button>
+            
+            <!-- Dynamic visualization type selector if multiple types are available -->
+            ${visualization.types && visualization.types.length > 1 ? `
+              <select class="visualization-type-selector" data-algorithm="${algorithm.id}">
+                ${visualization.types.map(type => `
+                  <option value="${type.value}" ${type.default ? 'selected' : ''}>
+                    ${type.label}
+                  </option>
+                `).join('')}
+              </select>
+            ` : ''}
+            
+            <!-- Toggle buttons for common visualization features -->
+            <div class="visualization-toggles">
+              <button class="btn-toggle ${visualizationParams.show_grid ? 'active' : ''}" 
+                data-algorithm="${algorithm.id}" data-param="show_grid" 
+                title="Toggle Grid">
+                <i class="fas fa-border-style"></i>
+              </button>
+              <button class="btn-toggle ${visualizationParams.show_axes ? 'active' : ''}" 
+                data-algorithm="${algorithm.id}" data-param="show_axes" 
+                title="Toggle Axes">
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Information section with description and instructions -->
+        <div class="visualization-info">
+          <div class="visualization-description">
+            <h4>${algorithm.title} Visualization</h4>
+            <p>${visualization.description || `Interact with the visualization to understand how ${algorithm.title} works.`}</p>
+          </div>
+          
+          ${visualization.instructions ? `
+            <div class="visualization-instructions">
+              <h5><i class="fas fa-lightbulb"></i> How to Use:</h5>
+              <ul>
+                ${visualization.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          
+          ${visualization.performanceTips ? `
+            <div class="visualization-tips">
+              <h5><i class="fas fa-info-circle"></i> Performance Tips:</h5>
+              <ul>
+                ${visualization.performanceTips.map(tip => `<li>${tip}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          
+          <!-- Dynamic parameters display -->
+          <div class="visualization-parameters">
+            <h5><i class="fas fa-sliders-h"></i> Current Parameters:</h5>
+            <div id="${algorithm.id}-params-display">
+              <!-- Will be populated with current parameters by the visualizer -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Enhanced initVisualizer function
+window.initVisualizer = function(algorithmId) {
+  // Add safety check for undefined algorithmId
+  if (!algorithmId) {
+    console.warn('initVisualizer called without algorithm ID');
+    return;
+  }
+  
+  const algorithm = ALGORITHMS?.find(a => a.id === algorithmId);
+  if (!algorithm || !algorithm.visualization) {
+    console.warn('No visualization configuration found for algorithm:', algorithmId);
+    showVisualizationError(`${algorithmId}-visualization`, 'No visualization available for this algorithm');
+    return;
+  }
+  
+  const visualization = algorithm.visualization;
+  const containerId = `${algorithmId}-visualization`;
+  const controlsContainerId = `${algorithmId}-controls`;
+  
+  // Remove loading indicator
+  const loadingElement = document.querySelector(`#${containerId} .visualization-loading`);
+  if (loadingElement) {
+    loadingElement.style.display = 'none';
+  }
+  
+  // Get visualization configuration
+  const visualizationType = visualization.defaultType || 'default';
+  const params = {
+    ...visualization.parameters,
+    interactive: true, // Always enable interactive mode
+    controlsContainer: controlsContainerId // Tell visualizer where to put controls
+  };
+  
+  // Get the visualizer function using the visualizerKey
+  const visualizerFn = window.visualizers[visualization.visualizerKey];
+  if (visualizerFn) {
+    try {
+      visualizerFn(containerId, visualizationType, params);
+      setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, params);
+    } catch (error) {
+      console.error('Error initializing visualizer:', error);
+      showVisualizationError(containerId, error.message);
+    }
+  } else {
+    console.warn('No visualizer function found for key:', visualization.visualizerKey);
+    showVisualizationError(containerId, `Visualizer "${visualization.visualizerKey}" not found`);
+  }
+};
+
+// Enhanced event handler setup
+function setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, baseParams) {
+  const visualization = algorithm.visualization;
+  
+  // Reset button handler
+  const resetBtn = document.querySelector(`.reset-visualization[data-algorithm="${algorithmId}"]`);
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      // Clear the canvas and reinitialize
+      const canvas = document.querySelector(`#${containerId} canvas`);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // Clear controls container
+      const controlsContainer = document.getElementById(`${algorithmId}-controls`);
+      if (controlsContainer) {
+        controlsContainer.innerHTML = '';
+      }
+      
+      // Reinitialize with default parameters
+      const defaultParams = {
+        ...visualization.parameters,
+        interactive: true,
+        controlsContainer: `${algorithmId}-controls`
+      };
+      
+      visualizerFn(containerId, visualization.defaultType, defaultParams);
+    });
+  }
+  
+  // Animate button handler
+  const animateBtn = document.querySelector(`.animate-visualization[data-algorithm="${algorithmId}"]`);
+  if (animateBtn) {
+    animateBtn.addEventListener('click', () => {
+      // Get current parameters from controls if they exist
+      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
+      visualizerFn(containerId, getCurrentVisualizationType(algorithmId, visualization), currentParams);
+    });
+  }
+  
+  // Visualization type selector handler
+  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
+  if (typeSelector) {
+    typeSelector.addEventListener('change', (e) => {
+      const newType = e.target.value;
+      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
+      visualizerFn(containerId, newType, currentParams);
+    });
+  }
+}
+
+// Helper function to get current visualization parameters
+function getCurrentVisualizationParams(algorithmId, baseParams) {
+  // This would extract current values from the dynamic controls
+  // For now, return the base params
+  return {
+    ...baseParams,
+    forceRestart: true
+  };
+}
+
+// Helper function to get current visualization type
+function getCurrentVisualizationType(algorithmId, visualization) {
+  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
+  return typeSelector ? typeSelector.value : visualization.defaultType;
+}
+
+// Enhanced error display
+function showVisualizationError(containerId, message) {
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = `
+      <div class="visualization-error">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="error-content">
+          <h4>Visualization Unavailable</h4>
+          <p>${message}</p>
+          <small>Please check the console for technical details.</small>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Function to initialize all visualizations (if needed)
+function initializeVisualization(algorithmId) {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => initVisualizer(algorithmId), 100);
+    });
+  } else {
+    setTimeout(() => initVisualizer(algorithmId), 100);
+  }
 }
 
 /**
