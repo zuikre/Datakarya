@@ -661,6 +661,7 @@ Main Layout & Structure
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+  margin-right: 1.5rem;
 }
 
 /* Search Input */
@@ -4494,4 +4495,5 @@ code {
   height: 12px;
   border-radius: 2px;
   flex-shrink: 0;
+
 }
