@@ -79,7 +79,7 @@
 
       .binary-code {
         font-family: 'Courier New', monospace;
-        font-size: 12px;
+        font-size: 22px;
         fill: rgba(0, 191, 255, 0.7);
         opacity: 0;
         animation: binaryFade 8s ease-in-out infinite;
@@ -254,15 +254,15 @@
     </style>
 
     <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#4895ef;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#4169e1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4cc9f0;stop-opacity:1" />
     </linearGradient>
     
     <linearGradient id="karyaGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#4169e1;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#4cc9f0;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#8a2be2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4895ef;stop-opacity:1" />
     </linearGradient>
     
     <linearGradient id="dataFlowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -340,14 +340,18 @@
     <circle class="particle delay-8-5s" cx="650" cy="60" r="2"/>
     <circle class="particle delay-9s" cx="750" cy="30" r="2"/>
 
-    <!-- Binary code -->
-    <text class="binary-code delay-0-5s" x="50" y="280">01000100</text>
-    <text class="binary-code delay-1s" x="150" y="260">01100001</text>
-    <text class="binary-code delay-1-5s" x="250" y="290">01110100</text>
-    <text class="binary-code delay-2s" x="350" y="270">01100001</text>
-    <text class="binary-code delay-2-5s" x="550" y="260">01100001</text>
-    <text class="binary-code delay-3s" x="650" y="290">01110010</text>
-    <text class="binary-code delay-3-5s" x="750" y="270">01111001</text>
+    <!-- Binary code for "DataKarya" -->
+    <text class="binary-code delay-0-5s" x="40"  y="50">01000100</text> <!-- D -->
+    <text class="binary-code delay-1s"   x="130" y="250">01100001</text> <!-- a -->
+    <text class="binary-code delay-1-5s" x="200" y="50">01110100</text> <!-- t -->
+    <text class="binary-code delay-2s"   x="310" y="250">01100001</text> <!-- a -->
+    <text class="binary-code delay-2-5s" x="360" y="50">01001011</text> <!-- K -->
+    <text class="binary-code delay-3s"   x="490" y="250">01100001</text> <!-- a -->
+    <text class="binary-code delay-3-5s" x="520" y="50">01110010</text> <!-- r -->
+    <text class="binary-code delay-4s"   x="670" y="250">01111001</text> <!-- y -->
+    <text class="binary-code delay-4-5s" x="680" y="50">01100001</text> <!-- a -->
+
+
   </g>
 
   <!-- Main Logo Text -->
