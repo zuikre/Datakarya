@@ -2180,39 +2180,80 @@ code {
   font-size: var(--font-size-xxl);
 }
 
+/* =============================
+   🎬 Elegant Cinematic Quiz UI
+   ============================= */
+
 .quiz-container {
   background: var(--secondary-bg);
-  border: var(--border-primary);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-lg);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-container::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle at top left, rgba(123, 44, 191, 0.1), transparent 60%);
+  z-index: 0;
 }
 
 .quiz-header {
   margin-bottom: var(--space-xl);
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .quiz-header h4 {
-  color: var(--primary-accent);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+}
+
+.quiz-header p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
 }
 
 .quiz-questions {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 .question-card {
   background: var(--tertiary-bg);
-  border: var(--border-primary);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-lg);
   padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+  position: relative;
+}
+
+.question-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .question-text {
   font-size: var(--font-size-lg);
   margin-bottom: var(--space-lg);
-  color: var(--text-primary);
+  color: var(--primary-accent);
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .question-options {
@@ -2225,53 +2266,90 @@ code {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background var(--transition-medium), border-color var(--transition-medium);
+}
+
+.option:hover {
+  background: rgba(123, 44, 191, 0.08);
+  border-color: var(--primary-accent);
 }
 
 .option input[type="radio"] {
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2px solid var(--text-tertiary);
   border-radius: 50%;
   transition: var(--transition-medium);
   position: relative;
+  background: transparent;
+  cursor: pointer;
 }
 
 .option input[type="radio"]:checked {
-  border-color: var(--primary-accent);
+  border-color: var(--secondary-accent);
+  box-shadow: 0 0 6px rgba(76, 201, 240, 0.5);
 }
 
 .option input[type="radio"]:checked::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 3px;
+  left: 3px;
   width: 10px;
   height: 10px;
-  background: var(--primary-accent);
+  background: var(--secondary-accent);
   border-radius: 50%;
 }
 
-.option label {
+.option .option-text {
   font-size: var(--font-size-md);
   color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition-medium);
+  transition: color var(--transition-medium);
 }
 
-.option:hover label {
+.option:hover .option-text {
   color: var(--text-primary);
 }
 
 .quiz-actions {
   display: flex;
   justify-content: center;
-  gap: var(--space-md);
+  gap: var(--space-lg);
   margin-top: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
-.submit-quiz, .reset-quiz {
-  padding: var(--space-md) var(--space-lg);
+.quiz-actions button {
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+}
+
+.quiz-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.submit-quiz {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+}
+
+.reset-quiz {
+  background: var(--gradient-secondary);
+  color: white;
+  border: none;
 }
 
 .detail-footer {
@@ -4582,3 +4660,4 @@ code {
   margin-top: var(--space-lg);
   justify-content: flex-end;
 }
+
