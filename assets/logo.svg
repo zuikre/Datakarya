@@ -3,9 +3,9 @@
     <style>
       .logo-text {
         font-family: 'Arial Black', 'Helvetica', sans-serif;
-        font-size: 4.2rem;
+        font-size: 7.2rem;
         font-weight: 900;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.00em;
         fill: none;
         stroke: #ffffff;
         stroke-width: 2;
@@ -352,11 +352,20 @@
 
   <!-- Main Logo Text -->
   <g class="main-text">
-    <!-- Glow effect layers -->
-    <text class="logo-text data glow-effect" x="200" y="180" text-anchor="middle">DataKarya</text>
     
     <!-- Main text -->
-    <text class="logo-text data" x="200" y="180" text-anchor="middle">Data</text>
-    <text class="logo-text karya" x="460" y="180" text-anchor="middle">Karya</text>
+      <!-- Left word: Data -->
+  <text class="logo-text data" 
+        x="40" y="220" 
+        text-anchor="start">
+    Data
+  </text>
+
+  <!-- Right word: Karya -->
+  <text class="logo-text karya" 
+        x="420" y="220" 
+        text-anchor="start">
+    Karya
+  </text>
   </g>
 </svg>
