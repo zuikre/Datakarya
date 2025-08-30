@@ -4498,3 +4498,86 @@ code {
 
 }
 
+
+
+/* =========================
+   USE CASES TAB (Scoped to uses only)
+   ========================= */
+.uses-container {
+  padding: var(--space-lg);
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  background: var(--secondary-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.uses-container h4 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-md);
+  color: var(--primary-accent);
+  text-shadow: var(--shadow-neon);
+  border-bottom: var(--border-primary);
+  padding-bottom: var(--space-sm);
+}
+
+/* Use Case Cards */
+.use-case-card {
+  display: flex;
+  align-items: flex-start;
+  background: var(--tertiary-bg);
+  border: var(--border-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-sm);
+}
+
+.use-case-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-lg), var(--shadow-neon-secondary);
+}
+
+/* Icon Section */
+.use-case-icon {
+  flex-shrink: 0;
+  margin-right: var(--space-md);
+  font-size: var(--font-size-lg);
+  color: var(--primary-accent);
+  text-shadow: var(--shadow-neon);
+  animation: var(--pulse-animation);
+}
+
+/* Content */
+.use-case-content h5 {
+  font-size: var(--font-size-md);
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--text-primary);
+}
+
+.use-case-content p {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-md);
+  color: var(--text-secondary);
+}
+
+/* Dataset */
+.use-case-dataset {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--secondary-accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-shadow: var(--shadow-neon-secondary);
+}
+
+/* Actions inside uses */
+.uses-container .use-case-actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  justify-content: flex-end;
+}
