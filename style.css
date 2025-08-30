@@ -2117,6 +2117,89 @@ code {
   gap: var(--space-sm);
 }
 
+/* 🔘 Shared button styles */
+.copy-code, 
+.expand-code {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  font-family: 'Ranade', sans-serif;
+  color: var(--text-secondary);
+  background: #2a2a3a;
+  border: 1px solid #3a3a4a;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* 🖱️ Hover effects */
+.copy-code:hover, 
+.expand-code:hover {
+  color: var(--text-primary);
+  background: linear-gradient(135deg, #2e2e4e, #1e1e2e);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 8px rgba(138, 180, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ✅ Active / pressed state */
+.copy-code:active, 
+.expand-code:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 0 4px rgba(138, 180, 255, 0.2);
+}
+
+/* ✨ Copy button success flash */
+.copy-code.copied {
+  background: #3a674f;
+  border-color: #50fa7b;
+  color: #50fa7b;
+  box-shadow: 0 0 10px rgba(80, 250, 123, 0.4);
+}
+
+/* 🔍 Expand (zoom) button icon animation */
+.expand-code i {
+  transition: transform 0.3s ease;
+}
+.expand-code:hover i {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.code-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.code-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.code-modal {
+  background: #1e1e2e;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-lg);
+  max-width: 90%;
+  max-height: 80%;
+  overflow: auto;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  animation: zoomIn 0.25s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0.7; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
 .application-container {
   display: flex;
   gap: var(--space-xl);

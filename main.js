@@ -1640,7 +1640,7 @@ function generateCodeTab(algorithm) {
   };
 
   return `
-    <div class="tab-pane code-tab-container" id="code-tab" role="tabpanel" aria-labelledby="code-tab">
+    <div class="tab-pane code-tab-container" id="code-tab" role="tabpanel" aria-labelled-by="code-tab">
       <div class="code-container">
         <div class="code-header">
           <h3 class="code-title">
@@ -1694,6 +1694,43 @@ function generateCodeTab(algorithm) {
     </div>
   `;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Expand (zoom) button logic
+  document.querySelectorAll(".expand-code").forEach(button => {
+    button.addEventListener("click", () => {
+      const container = button.closest(".code-container");
+      const modalOverlay = container.querySelector(".code-modal-overlay");
+      const modalContent = modalOverlay.querySelector(".modal-content");
+
+      // Clone the currently active code block
+      const activeBlock = container.querySelector(".code-block.active");
+      if (activeBlock) {
+        modalContent.innerHTML = activeBlock.outerHTML;
+      }
+
+      // Show modal
+      modalOverlay.classList.add("active");
+    });
+  });
+
+  // Close modal logic
+  document.querySelectorAll(".code-modal-overlay").forEach(overlay => {
+    const closeBtn = overlay.querySelector(".modal-close");
+
+    // Close on ✖ button
+    closeBtn.addEventListener("click", () => {
+      overlay.classList.remove("active");
+    });
+
+    // Close on clicking outside modal
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove("active");
+      }
+    });
+  });
+});
 
 // Clipboard copy logic
 document.addEventListener('click', function (e) {
