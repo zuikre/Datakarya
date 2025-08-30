@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataKarya | Interactive AI/ML Learning Platform</title>
+    <meta name="description" content="Learn machine learning algorithms through interactive visualizations and cinematic experiences">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ranade:wght@400;500;600&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/ranade" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- JS Libraries (will be loaded at bottom) -->
+</head>
+
+<body>
+    <div id="preloader" class="preloader" data-state="loading">
+        <div class="preloader-inner">
+            <div class="neon-logo">
+                <img src="assets/preloader.svg" alt="DataKarya Preloader" class="preloader-svg">
+            </div>
+            <div class="loading-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Cinematic Neural Navbar -->
+        <nav class="cinematic-navbar">
+            <!-- Neural network canvas overlay -->
+            <canvas id="neural-canvas"></canvas>
+
+            <div class="navbar-container">
+                <!-- Logo -->
+                <div class="logo-container">
+                    <a href="#" class="logo">
+                        <span>DataKarya</span>
+                    </a>
+                </div>
+
+                <!-- Links -->
+                <div class="nav-links">
+                    <ul>
+                        <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+                        <li><a href="#roadmap" class="nav-link">Learning Path</a></li>
+                        <li><a href="#resources" class="nav-link">Resources</a></li>
+                        <li><a href="#contact" class="nav-link">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Actions -->
+                <div class="nav-actions">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search algorithms..." class="search-input">
+                        <button class="search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="title-line">Master Machine Learning</span>
+                        <span class="title-line">Through <span class="highlight">Visual</span> Intelligence</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Interactive, cinematic explanations of AI/ML algorithms designed for intuitive understanding
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#dashboard" class="btn-primary">
+                            <span>Explore Algorithms</span>
+                            <i class="fas fa-arrow-down"></i>
+                        </a>
+                        <a href="#roadmap" class="btn-secondary">
+                            <span>Start Learning Path</span>
+                            <i class="fas fa-route"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Visualization Section -->
+                <div class="hero-visualization">
+                    <div class="neural-network-visualization tilt" id="neuralViz">
+                        
+                        <!-- Input Layer -->
+                        <div class="layer input-layer" data-layer="input">
+                            <div class="neuron" data-neuron="1"></div>
+                            <div class="neuron" data-neuron="2"></div>
+                            <div class="neuron" data-neuron="3"></div>
+                        </div>
+                        
+                        <!-- Connections between Input → Hidden -->
+                        <div class="connections" data-from="input" data-to="hidden"></div>
+                        
+                        <!-- Hidden Layer -->
+                        <div class="layer hidden-layer" data-layer="hidden">
+                            <div class="neuron" data-neuron="1"></div>
+                            <div class="neuron" data-neuron="2"></div>
+                            <div class="neuron" data-neuron="3"></div>
+                        </div>
+                        
+                        <!-- Connections between Hidden → Output -->
+                        <div class="connections" data-from="hidden" data-to="output"></div>
+                        
+                        <!-- Output Layer -->
+                        <div class="layer output-layer" data-layer="output">
+                            <div class="neuron" data-neuron="1"></div>
+                            <div class="neuron" data-neuron="2"></div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scroll-indicator">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+                <div class="arrow-down"></div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">Algorithm Dashboard</h2>
+                <p class="section-subtitle">
+                    Select an algorithm to explore its visual explanation, implementation, and applications
+                </p>
+            </div>
+            
+            <div class="dashboard-controls">
+                <div class="filter-group">
+                    <div class="filter-label">Filter by:</div>
+                    <div class="filter-options">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="supervised">Supervised</button>
+                        <button class="filter-btn" data-filter="unsupervised">Unsupervised</button>
+                        <button class="filter-btn" data-filter="deep">Deep Learning</button>
+                        <button class="filter-btn" data-filter="ensemble">Ensemble</button>
+                    </div>
+                    </div>
+
+                    <div class="difficulty-filter">
+                    <div class="filter-label">Difficulty:</div>
+                    <div class="difficulty-options">
+                        <button class="difficulty-btn active" data-difficulty="all">
+                        <span class="badge all">All</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="beginner">
+                        <span class="badge beginner">Beginner</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="intermediate">
+                        <span class="badge intermediate">Intermediate</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="advanced">
+                        <span class="badge advanced">Advanced</span>
+                        </button>
+                    </div>
+                    </div>
+            </div>
+            
+            <div class="algorithm-grid" id="algorithmGrid">
+                <!-- Algorithm cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Algorithm Details Section -->
+        <section id="algorithms" class="algorithms-section">
+            <div class="section-header">
+                <h2 class="section-title">Algorithm Deep Dives</h2>
+                <p class="section-subtitle">
+                    Interactive explanations with visualizations, code implementations, and real-world applications
+                </p>
+            </div>
+            
+            <!-- Algorithm details will be dynamically inserted here by JavaScript -->
+            <div id="algorithmDetailsContainer"></div>
+        </section>
+
+        <!-- Learning Path Section -->
+        <section id="roadmap" class="roadmap-section">
+            <div class="section-header">
+                <h2 class="section-title">Learning Path</h2>
+                <p class="section-subtitle">
+                    Follow our structured curriculum to master machine learning step by step
+                </p>
+            </div>
+            
+            <div class="roadmap-container">
+                <div class="roadmap-timeline">
+                    <div class="timeline-path"></div>
+                    
+                    <div class="timeline-item beginner">
+                        <div class="item-marker">
+                            <div class="marker-dot"></div>
+                            <div class="marker-line"></div>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-header">
+                                <div class="item-badge beginner">Beginner</div>
+                                <h4 class="item-title">Fundamentals</h4>
+                            </div>
+                            <div class="item-body">
+                                <ul class="item-algorithms">
+                                    <li data-algorithm="linear-regression">
+                                        <i class="fas fa-check-circle"></i> Linear Regression
+                                    </li>
+                                    <li data-algorithm="logistic-regression">
+                                        <i class="far fa-circle"></i> Logistic Regression
+                                    </li>
+                                    <li>
+                                        <i class="far fa-circle"></i> Data Preprocessing
+                                    </li>
+                                </ul>
+                                <div class="item-progress">
+                                    <div class="progress-text">1 of 3 completed</div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 33%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item intermediate">
+                        <div class="item-marker">
+                            <div class="marker-dot"></div>
+                            <div class="marker-line"></div>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-header">
+                                <div class="item-badge intermediate">Intermediate</div>
+                                <h4 class="item-title">Core Algorithms</h4>
+                            </div>
+                            <div class="item-body">
+                                <ul class="item-algorithms">
+                                    <li data-algorithm="decision-tree">
+                                        <i class="far fa-circle"></i> Decision Trees
+                                    </li>
+                                    <li data-algorithm="kmeans">
+                                        <i class="far fa-circle"></i> K-Means Clustering
+                                    </li>
+                                    <li>
+                                        <i class="far fa-circle"></i> Naive Bayes
+                                    </li>
+                                </ul>
+                                <div class="item-progress">
+                                    <div class="progress-text">0 of 3 completed</div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item advanced">
+                        <div class="item-marker">
+                            <div class="marker-dot"></div>
+                            <div class="marker-line"></div>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-header">
+                                <div class="item-badge advanced">Advanced</div>
+                                <h4 class="item-title">Advanced Topics</h4>
+                            </div>
+                            <div class="item-body">
+                                <ul class="item-algorithms">
+                                    <li data-algorithm="svm">
+                                        <i class="far fa-circle"></i> Support Vector Machines
+                                    </li>
+                                    <li>
+                                        <i class="far fa-circle"></i> Neural Networks
+                                    </li>
+                                    <li>
+                                        <i class="far fa-circle"></i> Ensemble Methods
+                                    </li>
+                                </ul>
+                                <div class="item-progress">
+                                    <div class="progress-text">0 of 3 completed</div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section id="resources" class="resources-section">
+            <div class="section-header">
+                <h2 class="section-title">Learning Resources</h2>
+                <p class="section-subtitle">
+                    Downloadable materials, cheat sheets, libraries, and recommended readings
+                </p>
+            </div>
+
+            <div class="resources-container">
+
+                <!-- All Cheat Sheets in One Row -->
+                <div class="resource-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-file-alt"></i> Cheat Sheets
+                    </h3>
+                    <div class="resource-grid">
+
+                        <!-- Linear Algebra -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-vector-square"></i></div>
+                            <div class="resource-content">
+                                <h4>Linear Algebra</h4>
+                                <p>Reference sheet for vectors, matrices, and operations</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://ml-cheatsheet.readthedocs.io/en/latest/linear_algebra.html" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Probability -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-percent"></i></div>
+                            <div class="resource-content">
+                                <h4>Probability</h4>
+                                <p>Key probability concepts and formulas</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://stanford.edu/~shervine/teaching/cme-106/cheatsheet-probability" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div class="resource-content">
+                                <h4>Statistics</h4>
+                                <p>Essential statistics concepts and formulas</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://stanford.edu/~shervine/teaching/cme-106/cheatsheet-statistics" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Calculus -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-square-root-alt"></i></div>
+                            <div class="resource-content">
+                                <h4>Calculus</h4>
+                                <p>Key derivatives, integrals, and rules</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://ml-cheatsheet.readthedocs.io/en/latest/calculus.html" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Regression -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="resource-content">
+                                <h4>Regression</h4>
+                                <p>Reference for regression algorithms</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://ml-cheatsheet.readthedocs.io/en/latest/regression_algos.html" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Classification -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-shapes"></i></div>
+                            <div class="resource-content">
+                                <h4>Classification</h4>
+                                <p>Reference for classification algorithms</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://ml-cheatsheet.readthedocs.io/en/latest/classification_algos.html" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Neural Networks -->
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-project-diagram"></i></div>
+                            <div class="resource-content">
+                                <h4>Neural Networks</h4>
+                                <p>Key concepts in neural networks</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://ml-cheatsheet.readthedocs.io/en/latest/nn_concepts.html" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Recommended Books -->
+                <div class="resource-category">
+                    <h3 class="category-title"><i class="fas fa-book"></i> Recommended Books</h3>
+                    <div class="resource-grid">
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-book-open"></i></div>
+                            <div class="resource-content">
+                                <h4>Introduction to Statistical Learning</h4>
+                                <p>Beginner-friendly textbook with R examples</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://www.statlearning.com/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-brain"></i></div>
+                            <div class="resource-content">
+                                <h4>Hands-On Machine Learning</h4>
+                                <p>Practical guide with Scikit-Learn and TensorFlow</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="http://14.139.161.31/OddSem-0822-1122/Hands-On_Machine_Learning_with_Scikit-Learn-Keras-and-TensorFlow-2nd-Edition-Aurelien-Geron.pdf" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notebooks & Code -->
+                <div class="resource-category">
+                    <h3 class="category-title"><i class="fas fa-laptop-code"></i> Notebooks & Code</h3>
+                    <div class="resource-grid">
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fab fa-python"></i></div>
+                            <div class="resource-content">
+                                <h4>Python ML Starter Kit</h4>
+                                <p>Basic algorithms implemented from scratch</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://github.com/madhug-nadig/Machine-Learning-Algorithms-from-Scratch" class="btn-secondary" target="_blank">
+                                    <i class="fab fa-github"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-database"></i></div>
+                            <div class="resource-content">
+                                <h4>Practice Datasets</h4>
+                                <p>Curated datasets for practicing algorithms</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://www.kaggle.com/datasets" class="btn-secondary" target="_blank">
+                                    <i class="fab fa-kaggle"></i> Kaggle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ML Tools -->
+                <div class="resource-category">
+                    <h3 class="category-title"><i class="fas fa-toolbox"></i> ML Tools</h3>
+                    <div class="resource-grid">
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fab fa-python"></i></div>
+                            <div class="resource-content">
+                                <h4>NumPy</h4>
+                                <p>Core numerical computing library</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://numpy.org/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Docs
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-table"></i></div>
+                            <div class="resource-content">
+                                <h4>Pandas</h4>
+                                <p>Data analysis and manipulation toolkit</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://pandas.pydata.org/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Docs
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-brain"></i></div>
+                            <div class="resource-content">
+                                <h4>Scikit-Learn</h4>
+                                <p>Machine learning toolkit for classical algorithms</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://scikit-learn.org/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Docs
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-network-wired"></i></div>
+                            <div class="resource-content">
+                                <h4>TensorFlow</h4>
+                                <p>End-to-end open-source deep learning framework</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://www.tensorflow.org/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Docs
+                                </a>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon"><i class="fas fa-fire"></i></div>
+                            <div class="resource-content">
+                                <h4>PyTorch</h4>
+                                <p>Deep learning framework with dynamic computation graphs</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="https://pytorch.org/" class="btn-secondary" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Docs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="section-header">
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="section-subtitle">
+                    Have questions or suggestions? We'd love to hear from you!
+                </p>
+            </div>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <!-- Personal Info Card -->
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Roubhi Zakarya</h4>
+                            <p>Data Scientist</p>
+
+                            <!-- Location -->
+                            <a href="https://maps.app.goo.gl/hydGbZuznnipwyVu8" target="_blank" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-map-marker-alt"></i> Ain Arnat
+                            </a>
+
+                            <!-- Email -->
+                            <a href="mailto:roubhizakarya@gmail.com" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-envelope"></i> Email Me
+                            </a>
+
+                            <!-- Phone -->
+                            <a href="tel:+213792913873" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-phone-alt"></i> +213 79 291 3873
+                            </a>
+
+                            <!-- Social Links -->
+                            <div class="social-links" style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                                <a href="https://x.com/zakaryaroubhi" class="social-link btn-primary" target="_blank" aria-label="Follow on X (Twitter)">
+                                    <i class="fa-brands fa-x-twitter"></i>
+                                </a>
+                                <a href="https://github.com/zuikre/" class="social-link btn-primary" target="_blank" aria-label="View GitHub Profile">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                                <a href="https://www.linkedin.com/in/zakaryaroubhi/" class="social-link btn-primary" target="_blank" aria-label="Connect on LinkedIn">
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                                <a href="https://www.facebook.com/zakaryaroubhi/" class="social-link btn-primary" target="_blank" aria-label="Visit Facebook Profile">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- Location & School Info -->
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Higher School of Economics, Oran</h4>
+                            <p>BP 65 CH 2 Achaba Hnifi, Technopôle de l'USTO. Bir El Djir, Oran, Algeria</p>
+
+                            <!-- Navigate -->
+                            <a href="https://maps.app.goo.gl/wjpmh4WPfvtYKGsb7" target="_blank" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-map-marked-alt"></i> Navigate
+                            </a>
+
+                            <!-- Official Website -->
+                            <a href="https://ese-oran.dz" target="_blank" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-globe"></i> Official Website
+                            </a>
+
+                            <!-- Phone -->
+                            <a href="tel:+21341627099" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fas fa-phone-alt"></i> 041 62 70 99
+                            </a>
+
+                            <!-- Facebook -->
+                            <a href="https://www.facebook.com/eseOran31/" target="_blank" class="btn-primary" style="margin-top: 0.3rem;">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </a>
+                        </div>
+                    </div>
+
+
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Contribute</h4>
+                            <p>This project is open-source on GitHub</p>
+                            <a href="#" class="github-link">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                   <form  id="contactForm"  action="https://formspree.io/f/mldlkkng"  method="POST">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject">
+                                <option value="question">Question</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="suggestion">Suggestion</option>
+                                <option value="contribution">Contribution</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </div>
+                        <input type="hidden" name="_replyto" value="roubhizakarya@gmail.com">
+                        <input type="hidden" name="_subject" value="New Contact Form Submission!">
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+        <div class="footer-container">
+
+            <!-- Brand Section -->
+            <div class="footer-brand">
+            <div class="footer-logo">
+                <i class="fas fa-brain-circuit"></i>
+                <span>DataKarya</span>
+            </div>
+            <p class="footer-description">
+                Interactive visual learning platform for AI and Machine Learning algorithms.
+            </p>
+
+            <!-- Social Links -->
+            <div class="footer-social" aria-label="Social Media Links">
+                <a href="https://x.com/zakaryaroubhi" class="social-link" target="_blank" aria-label="Follow on X (Twitter)">
+                <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <a href="https://github.com/zuikre/" class="social-link" target="_blank" aria-label="View GitHub Profile">
+                <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/zakaryaroubhi/" class="social-link" target="_blank" aria-label="Connect on LinkedIn">
+                <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://www.facebook.com/zakaryaroubhi/" class="social-link" target="_blank" aria-label="Visit Facebook Profile">
+                <i class="fab fa-facebook"></i>
+                </a>
+            </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="footer-links" aria-label="Footer Navigation">
+            <div class="links-group">
+                <h4 class="links-title">Learn</h4>
+                <ul>
+                <li><a href="#dashboard">Algorithms Dashboard</a></li>
+                <li><a href="#roadmap">Learning Path</a></li>
+                <li><a href="#resources">Resources</a></li>
+                </ul>
+            </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <p>
+            &copy; 2025 <strong>DataKarya</strong>. All rights reserved. <br>
+            Made with <i class="fas fa-heart"></i> by <a href="https://www.linkedin.com/in/zakaryaroubhi/" target="_blank">Zakarya Roubhi</a>
+            </p>
+            <p class="footer-meta">
+            Version 1.0.0 • Last Updated: <time datetime="2025-08-29">August 29, 2025</time>
+            </p>
+        </div>
+        </footer>
+
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- First include data.js -->
+    <script src="data.js"></script>
+    <script src="visualizations.js"></script>
+    <!-- Then include main.js which depends on data.js -->
+    <script src="main.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const roadmapSections = {
+    beginner: document.querySelector("#roadmap .timeline-item.beginner .item-algorithms"),
+    intermediate: document.querySelector("#roadmap .timeline-item.intermediate .item-algorithms"),
+    advanced: document.querySelector("#roadmap .timeline-item.advanced .item-algorithms"),
+  };
+
+  // Clear default static list items
+  Object.values(roadmapSections).forEach(ul => ul.innerHTML = "");
+
+  // Track progress counts
+  const progress = { beginner: { done: 0, total: 0 }, intermediate: { done: 0, total: 0 }, advanced: { done: 0, total: 0 } };
+
+  ALGORITHMS.forEach(alg => {
+    // Pick correct section
+    const section = roadmapSections[alg.difficulty];
+    if (!section) return;
+
+    // Count it
+    progress[alg.difficulty].total++;
+
+    // Create list item
+    const li = document.createElement("li");
+    li.dataset.algorithm = alg.id;
+    li.innerHTML = `<i class="far fa-circle"></i> ${alg.title}`;
+    section.appendChild(li);
+  });
+
+  // Update progress bars
+  Object.keys(progress).forEach(level => {
+    const { done, total } = progress[level];
+    const progressText = document.querySelector(`.timeline-item.${level} .progress-text`);
+    const progressFill = document.querySelector(`.timeline-item.${level} .progress-fill`);
+    if (progressText) progressText.textContent = `${done} of ${total} completed`;
+    if (progressFill) progressFill.style.width = total > 0 ? `${(done / total) * 100}%` : "0%";
+  });
+});
+</script>
+</body>
+</html>
