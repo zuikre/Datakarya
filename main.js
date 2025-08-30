@@ -280,7 +280,7 @@ function initializeDOMReferences() {
   DOM.progressBar = document.querySelector('.preloader .progress');
   
   // Navigation elements
-  DOM.navbar = document.querySelector('.navbar');
+  DOM.navbar = document.querySelector('.cinematic-navbar');
   DOM.menuToggle = document.querySelector('.menu-toggle');
   DOM.navLinks = document.querySelector('.nav-links');
   DOM.navLinksList = document.querySelector('.nav-links ul');

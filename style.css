@@ -4573,10 +4573,7 @@ code {
   height: 12px;
   border-radius: 2px;
   flex-shrink: 0;
-
 }
-
-
 
 /* =========================
    USE CASES TAB (Elegant Cinematic UI)
@@ -4660,4 +4657,3 @@ code {
   margin-top: var(--space-lg);
   justify-content: flex-end;
 }
-
