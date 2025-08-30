@@ -2,8 +2,8 @@
   <defs>
     <style>
       .logo-text {
-        font-family: 'Arial Black', 'Helvetica', sans-serif;
-        font-size: 7.2rem;
+        font-family: 'Ranade', sans-serif;
+        font-size: 7.5rem;
         font-weight: 900;
         letter-spacing: -0.00em;
         fill: none;
@@ -356,14 +356,14 @@
     <!-- Main text -->
       <!-- Left word: Data -->
   <text class="logo-text data" 
-        x="40" y="220" 
+        x="70" y="190" 
         text-anchor="start">
     Data
   </text>
 
   <!-- Right word: Karya -->
   <text class="logo-text karya" 
-        x="420" y="220" 
+        x="390" y="170" 
         text-anchor="start">
     Karya
   </text>
