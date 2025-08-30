@@ -1,1163 +1,329 @@
-<svg viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" style="background: #0a0a0a;">
-  <!-- ===== DEFINITIONS SECTION ===== -->
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Filter Definitions -->
   <defs>
-    <!-- NEURAL GLOW FILTERS -->
-    <filter id="neuralGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+      
+      .logo-text {
+        font-family: 'Orbitron', monospace;
+        font-size: 5.5rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 2;
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.7));
+        animation: drawText 4s ease-in-out forwards;
+      }
+
+      .logo-text.data {
+        fill: url(#dataGradient);
+        animation-delay: 0s;
+      }
+
+      .logo-text.karya {
+        fill: url(#karyaGradient);
+        animation-delay: 2s;
+      }
+
+      .neural-node {
+        r: 4;
+        fill: #8a2be2;
+        opacity: 0;
+        filter: url(#glow);
+        animation: nodeGlow 6s ease-in-out infinite;
+      }
+
+      .neural-connection {
+        stroke: #4169e1;
+        stroke-width: 1.5;
+        opacity: 0;
+        stroke-dasharray: 5, 5;
+        filter: url(#connectionGlow);
+        animation: connectionPulse 8s ease-in-out infinite;
+      }
+
+      .particle {
+        r: 2;
+        fill: #00bfff;
+        opacity: 0;
+        filter: url(#particleGlow);
+        animation: particleFloat 10s ease-in-out infinite;
+      }
+
+      .circuit-pulse {
+        stroke: #00ffff;
+        stroke-width: 1.5;
+        fill: none;
+        opacity: 0;
+        filter: url(#circuitGlow);
+        stroke-dasharray: 10, 5;
+        animation: circuitFlow 12s ease-in-out infinite;
+      }
+
+      .data-flow {
+        stroke: url(#dataFlowGradient);
+        stroke-width: 2;
+        fill: none;
+        opacity: 0;
+        stroke-dasharray: 15, 5;
+        stroke-dashoffset: 100;
+        filter: url(#dataFlowGlow);
+        animation: dataFlow 9s linear infinite;
+      }
+
+      .hexagon {
+        fill: none;
+        stroke: rgba(65, 105, 225, 0.5);
+        stroke-width: 1;
+        opacity: 0;
+        animation: hexPulse 15s ease-in-out infinite;
+      }
+
+      .binary-code {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        fill: rgba(0, 191, 255, 0.7);
+        opacity: 0;
+        animation: binaryFade 8s ease-in-out infinite;
+      }
+
+      .glow-effect {
+        filter: url(#glow);
+        opacity: 0.7;
+      }
+
+      @keyframes drawText {
+        0% {
+          stroke-dashoffset: 1000;
+          fill-opacity: 0;
+        }
+        70% {
+          stroke-dashoffset: 0;
+          fill-opacity: 0;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          fill-opacity: 1;
+          stroke: rgba(255, 255, 255, 0.2);
+        }
+      }
+
+      @keyframes nodeGlow {
+        0%, 100% { opacity: 0; transform: scale(1); }
+        20% { opacity: 0.9; transform: scale(1.3); }
+        40% { opacity: 0.7; transform: scale(1); }
+        60% { opacity: 1; transform: scale(1.2); }
+        80% { opacity: 0.5; transform: scale(1); }
+      }
+
+      @keyframes connectionPulse {
+        0%, 100% { opacity: 0; stroke-dashoffset: 20; }
+        25% { opacity: 0.8; stroke-dashoffset: 0; }
+        50% { opacity: 1; stroke-dashoffset: -10; }
+        75% { opacity: 0.6; stroke-dashoffset: -20; }
+      }
+
+      @keyframes particleFloat {
+        0%, 100% { opacity: 0; transform: translateY(0px) translateX(0px); }
+        20% { opacity: 0.9; transform: translateY(-25px) translateX(15px); }
+        40% { opacity: 0.7; transform: translateY(-15px) translateX(-20px); }
+        60% { opacity: 1; transform: translateY(-35px) translateX(10px); }
+        80% { opacity: 0.5; transform: translateY(-10px) translateX(-12px); }
+      }
+
+      @keyframes circuitFlow {
+        0%, 100% { opacity: 0; stroke-dashoffset: 100; }
+        30% { opacity: 0.9; stroke-dashoffset: 0; }
+        70% { opacity: 0.7; stroke-dashoffset: -50; }
+      }
+
+      @keyframes dataFlow {
+        0% { stroke-dashoffset: 100; opacity: 0; }
+        10% { opacity: 0.8; }
+        90% { opacity: 0.8; }
+        100% { stroke-dashoffset: -100; opacity: 0; }
+      }
+
+      @keyframes hexPulse {
+        0%, 100% { opacity: 0; transform: rotate(0deg); }
+        50% { opacity: 0.4; transform: rotate(180deg); }
+      }
+
+      @keyframes binaryFade {
+        0%, 100% { opacity: 0; }
+        25%, 75% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+
+      /* Animation delays for staggered effects */
+      .hex-1 { animation-delay: 1s; }
+      .hex-2 { animation-delay: 2s; }
+      .hex-3 { animation-delay: 3s; }
+      .hex-4 { animation-delay: 4s; }
+      .hex-5 { animation-delay: 5s; }
+      .hex-6 { animation-delay: 6s; }
+      .hex-7 { animation-delay: 7s; }
+
+      .connection-1 { animation-delay: 3s; }
+      .connection-2 { animation-delay: 3.5s; }
+      .connection-3 { animation-delay: 4s; }
+      .connection-4 { animation-delay: 4.5s; }
+      .connection-5 { animation-delay: 5s; }
+      .connection-6 { animation-delay: 5.5s; }
+
+      .circuit-1 { animation-delay: 5s; }
+      .circuit-2 { animation-delay: 6s; }
+      .circuit-3 { animation-delay: 7s; }
+
+      .flow-1 { animation-delay: 0s; }
+      .flow-2 { animation-delay: 3s; }
+      .flow-3 { animation-delay: 6s; }
+
+      .node-1 { animation-delay: 3.2s; }
+      .node-2 { animation-delay: 3.7s; }
+      .node-3 { animation-delay: 4.2s; }
+      .node-4 { animation-delay: 4.7s; }
+      .node-5 { animation-delay: 5.2s; }
+      .node-6 { animation-delay: 5.7s; }
+
+      .particle-1 { animation-delay: 7s; }
+      .particle-2 { animation-delay: 7.5s; }
+      .particle-3 { animation-delay: 8s; }
+      .particle-4 { animation-delay: 8.5s; }
+      .particle-5 { animation-delay: 9s; }
+      .particle-6 { animation-delay: 9.5s; }
+
+      .binary-1 { animation-delay: 0.5s; }
+      .binary-2 { animation-delay: 1s; }
+      .binary-3 { animation-delay: 1.5s; }
+      .binary-4 { animation-delay: 2s; }
+      .binary-5 { animation-delay: 2.5s; }
+      .binary-6 { animation-delay: 3s; }
+      .binary-7 { animation-delay: 3.5s; }
+      .binary-8 { animation-delay: 4s; }
+      .binary-9 { animation-delay: 4.5s; }
+    </style>
+
+    <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4169e1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00bfff;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="karyaGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4169e1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8a2be2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="dataFlowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00bfff;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow Filters -->
+    <filter id="glow" height="300%" width="300%" x="-75%" y="-75%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="glow" />
+      <feComposite in="SourceGraphic" in2="glow" operator="over" />
+    </filter>
+    
+    <filter id="connectionGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
     
-    <filter id="intenseGlow" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="particleGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -7" />
     </filter>
     
-    <filter id="pulseGlow" x="-200%" y="-200%" width="400%" height="400%">
-      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="circuitGlow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" />
     </filter>
-
-    <!-- ANIMATED GRADIENTS FOR NEURAL FLOW -->
-    <linearGradient id="neuralFlow1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#6a0dad;stop-opacity:0">
-        <animate attributeName="stop-opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="50%" style="stop-color:#ff00ff;stop-opacity:1">
-        <animate attributeName="stop-opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0">
-        <animate attributeName="stop-opacity" values="0;1;0" dur="2.5s" repeatCount="indefinite"/>
-      </stop>
-      <animateTransform attributeName="gradientTransform" type="translate" values="-100 0;100 0;-100 0" dur="4s" repeatCount="indefinite"/>
-    </linearGradient>
-
-    <linearGradient id="neuralFlow2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:0">
-        <animate attributeName="stop-opacity" values="0;1;0" dur="2.8s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="50%" style="stop-color:#da70d6;stop-opacity:1">
-        <animate attributeName="stop-opacity" values="1;0.2;1" dur="3.2s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#4169e1;stop-opacity:0">
-        <animate attributeName="stop-opacity" values="0;1;0" dur="2.2s" repeatCount="indefinite"/>
-      </stop>
-      <animateTransform attributeName="gradientTransform" type="translate" values="100 0;-100 0;100 0" dur="3.5s" repeatCount="indefinite"/>
-    </linearGradient>
-
-    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:1"/>
-      <stop offset="50%" style="stop-color:#8a2be2;stop-opacity:0.8"/>
-      <stop offset="100%" style="stop-color:#4169e1;stop-opacity:0"/>
-    </radialGradient>
-
-    <radialGradient id="pulsatingNode" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1">
-        <animate attributeName="stop-opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="70%" style="stop-color:#ff00ff;stop-opacity:0.6">
-        <animate attributeName="stop-opacity" values="0.6;0.1;0.6" dur="1.8s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#6a0dad;stop-opacity:0"/>
-    </radialGradient>
-
-    <!-- MASKS FOR COMPLEX ANIMATIONS -->
-
-    <!-- CLIP PATHS FOR NEURAL CONNECTIONS -->
+    
+    <filter id="dataFlowGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -9" />
+    </filter>
   </defs>
 
-  <!-- ===== BACKGROUND NEURAL NETWORK LAYER ===== -->
-  <!-- Ambient Neural Grid Background -->
-  <g opacity="0.3">
-    <!-- Background Neural Connections -->
-    <path d="M50,50 Q200,100 350,50 T650,100 Q800,150 950,100 T1150,50" 
-          stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite"/>
-    </path>
+  <!-- Neural Network Background Elements -->
+  <g class="neural-network">
+    <!-- Hexagonal grid background -->
+    <g class="hex-grid">
+      <path class="hexagon hex-1" d="M 100,50 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-2" d="M 200,80 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-3" d="M 300,40 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-4" d="M 400,70 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-5" d="M 500,30 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-6" d="M 600,60 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+      <path class="hexagon hex-7" d="M 700,90 l 25,-15 l 25,15 l 0,30 l -25,15 l -25,-15 Z" />
+    </g>
     
-    <path d="M100,300 Q250,250 400,300 T700,250 Q850,200 1000,250 T1150,300" 
-          stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.3">
-      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="5s" repeatCount="indefinite"/>
-    </path>
+    <!-- Binary code particles -->
+    <g class="binary-codes">
+      <text class="binary-code binary-1" x="50" y="280">01000100</text>
+      <text class="binary-code binary-2" x="150" y="260">01100001</text>
+      <text class="binary-code binary-3" x="250" y="290">01110100</text>
+      <text class="binary-code binary-4" x="350" y="270">01100001</text>
+      <text class="binary-code binary-5" x="450" y="280">01001011</text>
+      <text class="binary-code binary-6" x="550" y="260">01100001</text>
+      <text class="binary-code binary-7" x="650" y="290">01110010</text>
+      <text class="binary-code binary-8" x="750" y="270">01111001</text>
+      <text class="binary-code binary-9" x="50" y="240">01100001</text>
+    </g>
+
+    <!-- Neural Connections -->
+    <line class="neural-connection connection-1" x1="50" y1="80" x2="120" y2="60"/>
+    <line class="neural-connection connection-2" x1="180" y1="90" x2="240" y2="70"/>
+    <line class="neural-connection connection-3" x1="320" y1="85" x2="380" y2="65"/>
+    <line class="neural-connection connection-4" x1="450" y1="95" x2="520" y2="75"/>
+    <line class="neural-connection connection-5" x1="580" y1="100" x2="650" y2="80"/>
+    <line class="neural-connection connection-6" x1="710" y1="110" x2="780" y2="90"/>
     
-    <!-- Floating Neural Nodes -->
-    <circle cx="150" cy="80" r="3" fill="url(#nodeGlow)" opacity="0.6">
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.3s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="translate" values="0,0;10,-5;0,0" dur="6s" repeatCount="indefinite"/>
-    </circle>
+    <!-- Circuit-like paths -->
+    <path class="circuit-pulse circuit-1" d="M 30,120 Q 150,100 270,130 T 550,110"/>
+    <path class="circuit-pulse circuit-2" d="M 70,150 Q 200,140 350,160 T 580,140"/>
+    <path class="circuit-pulse circuit-3" d="M 100,180 Q 250,170 400,190 T 750,170"/>
+
+    <!-- Data flow paths -->
+    <path class="data-flow flow-1" d="M 0,100 Q 100,80 200,110 T 400,90 T 600,120 T 800,100"/>
+    <path class="data-flow flow-2" d="M 0,130 Q 150,110 300,140 T 600,120 T 800,150"/>
+    <path class="data-flow flow-3" d="M 0,160 Q 120,140 250,170 T 500,150 T 800,180"/>
+
+    <!-- Neural Nodes -->
+    <circle class="neural-node node-1" cx="85" cy="70"/>
+    <circle class="neural-node node-2" cx="210" cy="80"/>
+    <circle class="neural-node node-3" cx="350" cy="75"/>
+    <circle class="neural-node node-4" cx="485" cy="85"/>
+    <circle class="neural-node node-5" cx="615" cy="90"/>
+    <circle class="neural-node node-6" cx="745" cy="100"/>
     
-    <circle cx="850" cy="120" r="4" fill="url(#pulsatingNode)" opacity="0.8">
-      <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="300" cy="300" r="2" fill="#00ffff" opacity="0.5">
-      <animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
+    <!-- Floating Particles -->
+    <circle class="particle particle-1" cx="100" cy="50"/>
+    <circle class="particle particle-2" cx="250" cy="45"/>
+    <circle class="particle particle-3" cx="400" cy="55"/>
+    <circle class="particle particle-4" cx="500" cy="40"/>
+    <circle class="particle particle-5" cx="650" cy="60"/>
+    <circle class="particle particle-6" cx="750" cy="30"/>
   </g>
 
-  <!-- ===== MAIN TEXT NEURAL STRUCTURE ===== -->
-  <!-- Letter D Neural Network -->
-  <g id="letterD" transform="translate(120,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,120 L20,320 L80,320 Q140,320 140,260 L140,180 Q140,120 80,120 Z" 
-          stroke="url(#neuralFlow1)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;6;4" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter D -->
-    <circle cx="20" cy="140" r="4" fill="url(#pulsatingNode)" filter="url(#neuralGlow)">
-      <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="3" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="120" cy="160" r="5" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="5;8;5" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="140" cy="220" r="3" fill="#8a2be2">
-      <animate attributeName="r" values="3;6;3" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="290" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="300" r="3" fill="#00ffff">
-      <animate attributeName="fill" values="#00ffff;#ff00ff;#00ffff" dur="3.5s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for D -->
-    <path d="M20,140 Q40,130 60,120" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.7">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 Q90,140 120,160" stroke="#ff00ff" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="stroke-dasharray" values="0,100;100,0;0,100" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M120,160 L140,220" stroke="url(#neuralFlow1)" stroke-width="1.5" fill="none">
-      <animate attributeName="stroke-width" values="1.5;3;1.5" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M140,220 Q120,260 100,290" stroke="#8a2be2" stroke-width="2" fill="none" opacity="0.6">
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M100,290 Q60,300 20,300" stroke="url(#neuralFlow2)" stroke-width="1.8" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,80;80,0;0,80" dur="4s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter A Neural Network -->
-  <g id="letterA" transform="translate(240,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,320 L40,220 L60,120 L80,220 L100,320 M30,260 L90,260" 
-          stroke="url(#neuralFlow2)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter A -->
-    <circle cx="20" cy="320" r="3" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="3;6;3" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="40" cy="240" r="4" fill="#00ffff" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="5" fill="url(#pulsatingNode)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;9;5" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="240" r="3" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#8a2be2;#ff00ff" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="30" cy="260" r="2" fill="#4169e1">
-      <animate attributeName="r" values="2;5;2" dur="1.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="260" r="3" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="3;6;3" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="90" cy="260" r="2" fill="#00ffff">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for A -->
-    <path d="M20,320 Q30,280 40,240" stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M40,240 Q50,180 60,120" stroke="#ff00ff" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,120;120,0;0,120" dur="3.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 Q70,180 80,240" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.9">
-      <animate attributeName="stroke-width" values="2;4;2" dur="2.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,240 Q90,280 100,320" stroke="#8a2be2" stroke-width="2" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M30,260 L60,260" stroke="url(#neuralFlow1)" stroke-width="3" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,260 L90,260" stroke="#00ffff" stroke-width="2.5" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter T Neural Network -->
-  <g id="letterT" transform="translate(360,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,120 L100,120 M60,120 L60,320" 
-          stroke="url(#neuralFlow1)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;6;4" dur="2.7s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter T -->
-    <circle cx="20" cy="120" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="40" cy="120" r="3" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="5" fill="url(#nodeGlow)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;9;5" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="120" r="3" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="120" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;6;4" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="180" r="3" fill="#00ffff">
-      <animate attributeName="r" values="3;6;3" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="240" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="300" r="3" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#4169e1;#ff00ff" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="320" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;7;4" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for T -->
-    <path d="M20,120 L40,120" stroke="url(#neuralFlow2)" stroke-width="2.5" fill="none" opacity="0.9">
-      <animate attributeName="stroke-dasharray" values="0,20;20,0;0,20" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M40,120 L60,120" stroke="#ff00ff" stroke-width="3" fill="none">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 L80,120" stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,120 L100,120" stroke="#8a2be2" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,20;20,0;0,20" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 L60,180" stroke="url(#neuralFlow2)" stroke-width="3" fill="none">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,180 L60,240" stroke="#00ffff" stroke-width="2.8" fill="none" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.9s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,240 L60,300" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,60;60,0;0,60" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,300 L60,320" stroke="#ff00ff" stroke-width="3" fill="none" opacity="0.8">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter A (Second A) Neural Network -->
-  <g id="letterA2" transform="translate(480,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,320 L40,220 L60,120 L80,220 L100,320 M30,260 L90,260" 
-          stroke="url(#neuralFlow1)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;7;4" dur="2.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Second Letter A -->
-    <circle cx="20" cy="320" r="3" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="3;6;3" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="40" cy="240" r="4" fill="#8a2be2" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="5" fill="url(#pulsatingNode)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;10;5" dur="3.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="240" r="3" fill="#00ffff">
-      <animate attributeName="fill" values="#00ffff;#ff00ff;#00ffff" dur="2.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="30" cy="260" r="2" fill="#ff00ff">
-      <animate attributeName="r" values="2;5;2" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="260" r="3" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="3;6;3" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="90" cy="260" r="2" fill="#4169e1">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for Second A -->
-    <path d="M20,320 Q30,280 40,240" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M40,240 Q50,180 60,120" stroke="#8a2be2" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,120;120,0;0,120" dur="3.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 Q70,180 80,240" stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.9">
-      <animate attributeName="stroke-width" values="2;4;2" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,240 Q90,280 100,320" stroke="#00ffff" stroke-width="2" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M30,260 L60,260" stroke="url(#neuralFlow2)" stroke-width="3" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,260 L90,260" stroke="#ff00ff" stroke-width="2.5" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter K Neural Network -->
-  <g id="letterK" transform="translate(620,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,120 L20,320 M20,220 L100,120 M20,220 L100,320" 
-          stroke="url(#neuralFlow2)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;6;4" dur="2.9s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter K -->
-    <circle cx="20" cy="120" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;8;4" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="180" r="3" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="2.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="220" r="5" fill="url(#nodeGlow)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;9;5" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="260" r="3" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="320" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;7;4" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="170" r="3" fill="#00ffff">
-      <animate attributeName="r" values="3;6;3" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="120" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="270" r="3" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#4169e1;#ff00ff" dur="2.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;7;4" dur="2.6s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for K -->
-    <path d="M20,120 L20,180" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none" opacity="0.9">
-      <animate attributeName="stroke-dasharray" values="0,60;60,0;0,60" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,180 L20,220" stroke="#ff00ff" stroke-width="3" fill="none">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,220 L20,260" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,260 L20,320" stroke="#8a2be2" stroke-width="2.8" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,60;60,0;0,60" dur="2.7s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,220 Q40,195 60,170" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-width" values="2.5;4;2.5" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,170 Q80,145 100,120" stroke="#00ffff" stroke-width="2.3" fill="none" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,220 Q40,245 60,270" stroke="url(#neuralFlow2)" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,70;70,0;0,70" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,270 Q80,295 100,320" stroke="#ff00ff" stroke-width="2.8" fill="none" opacity="0.8">
-      <animate attributeName="stroke-width" values="2.8;4.5;2.8" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter A (Third A) Neural Network -->
-  <g id="letterA3" transform="translate(740,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,320 L40,220 L60,120 L80,220 L100,320 M30,260 L90,260" 
-          stroke="url(#neuralFlow1)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;7;4" dur="3.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Third Letter A -->
-    <circle cx="20" cy="320" r="3" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="3;6;3" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="40" cy="240" r="4" fill="#4169e1" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="5" fill="url(#pulsatingNode)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;11;5" dur="3.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="240" r="3" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#8a2be2;#ff00ff" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="30" cy="260" r="2" fill="#00ffff">
-      <animate attributeName="r" values="2;5;2" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="260" r="3" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="3;7;3" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="90" cy="260" r="2" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for Third A -->
-    <path d="M20,320 Q30,280 40,240" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M40,240 Q50,180 60,120" stroke="#4169e1" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,120;120,0;0,120" dur="4.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 Q70,180 80,240" stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.9">
-      <animate attributeName="stroke-width" values="2;4;2" dur="2.6s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,240 Q90,280 100,320" stroke="#ff00ff" stroke-width="2" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M30,260 L60,260" stroke="url(#neuralFlow2)" stroke-width="3" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,260 L90,260" stroke="#00ffff" stroke-width="2.5" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter R Neural Network -->
-  <g id="letterR" transform="translate(860,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,120 L20,320 M20,120 L80,120 Q100,120 100,160 Q100,200 80,200 L20,200 M60,200 L100,320" 
-          stroke="url(#neuralFlow2)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;6;4" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter R -->
-    <circle cx="20" cy="120" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;8;4" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="50" cy="120" r="3" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="120" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="4;7;4" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="140" r="3" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="160" r="5" fill="url(#pulsatingNode)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;9;5" dur="2.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="180" r="3" fill="#00ffff">
-      <animate attributeName="r" values="3;6;3" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="200" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="50" cy="200" r="3" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#4169e1;#ff00ff" dur="3.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="200" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="260" r="3" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="20" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="4;8;4" dur="2.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="240" r="3" fill="#00ffff">
-      <animate attributeName="r" values="3;6;3" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="280" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="#ff00ff">
-      <animate attributeName="fill" values="#ff00ff;#8a2be2;#ff00ff" dur="2.9s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for R -->
-    <path d="M20,120 L50,120" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none" opacity="0.9">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M50,120 L80,120" stroke="#ff00ff" stroke-width="3" fill="none">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,120 Q90,130 100,140" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M100,140 L100,160" stroke="#8a2be2" stroke-width="2.8" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,20;20,0;0,20" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M100,160 L100,180" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-width" values="2.5;4;2.5" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M100,180 Q90,190 80,200" stroke="#00ffff" stroke-width="2.3" fill="none" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,200 L50,200" stroke="url(#neuralFlow2)" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2.6s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M50,200 L20,200" stroke="#ff00ff" stroke-width="2.8" fill="none" opacity="0.8">
-      <animate attributeName="stroke-width" values="2.8;4.2;2.8" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,120 L20,200" stroke="url(#neuralFlow1)" stroke-width="3.2" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,80;80,0;0,80" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,200 L20,260" stroke="#8a2be2" stroke-width="2.5" fill="none" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M20,260 L20,320" stroke="url(#neuralFlow2)" stroke-width="2.8" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,60;60,0;0,60" dur="2.7s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M50,200 Q55,220 60,240" stroke="#00ffff" stroke-width="2.2" fill="none" opacity="0.8">
-      <animate attributeName="stroke-width" values="2.2;3.8;2.2" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,240 Q70,260 80,280" stroke="url(#neuralFlow1)" stroke-width="2.5" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,280 Q90,300 100,320" stroke="#ff00ff" stroke-width="2.7" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,50;50,0;0,50" dur="2.8s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter Y Neural Network -->
-  <g id="letterY" transform="translate(980,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,120 Q40,160 60,200 Q80,160 100,120 M60,200 L60,320" 
-          stroke="url(#neuralFlow1)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;7;4" dur="2.6s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Letter Y -->
-    <circle cx="20" cy="120" r="4" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="4;8;4" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="35" cy="145" r="3" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="50" cy="175" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="4;7;4" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="200" r="5" fill="url(#pulsatingNode)" filter="url(#intenseGlow)">
-      <animate attributeName="r" values="5;10;5" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="70" cy="175" r="3" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="85" cy="145" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="120" r="4" fill="#00ffff">
-      <animate attributeName="r" values="4;7;4" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="240" r="3" fill="url(#pulsatingNode)">
-      <animate attributeName="fill" values="#ff00ff;#4169e1;#ff00ff" dur="3.1s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="280" r="4" fill="#8a2be2">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="4;8;4" dur="2.7s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for Y -->
-    <path d="M20,120 Q30,135 35,145" stroke="url(#neuralFlow2)" stroke-width="2.5" fill="none" opacity="0.9">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M35,145 Q42,160 50,175" stroke="#ff00ff" stroke-width="3" fill="none">
-      <animate attributeName="stroke-width" values="3;5;3" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M50,175 Q55,185 60,200" stroke="url(#neuralFlow1)" stroke-width="2.8" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,200 Q65,185 70,175" stroke="#8a2be2" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,25;25,0;0,25" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M70,175 Q78,160 85,145" stroke="url(#neuralFlow2)" stroke-width="2.8" fill="none">
-      <animate attributeName="stroke-width" values="2.8;4.2;2.8" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M85,145 Q92,135 100,120" stroke="#00ffff" stroke-width="2.3" fill="none" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,200 L60,240" stroke="url(#neuralFlow1)" stroke-width="3.2" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,40;40,0;0,40" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,240 L60,280" stroke="#ff00ff" stroke-width="2.8" fill="none" opacity="0.8">
-      <animate attributeName="stroke-width" values="2.8;4.5;2.8" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,280 L60,320" stroke="url(#neuralFlow2)" stroke-width="3" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- Letter A (Final A) Neural Network -->
-  <g id="letterA4" transform="translate(1100,0)">
-    <!-- Main Letter Path -->
-    <path d="M20,320 L40,220 L60,120 L80,220 L100,320 M30,260 L90,260" 
-          stroke="url(#neuralFlow2)" stroke-width="4" fill="none" filter="url(#neuralGlow)">
-      <animate attributeName="stroke-width" values="4;7;4" dur="3.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Neural Nodes on Final Letter A -->
-    <circle cx="20" cy="320" r="3" fill="url(#nodeGlow)">
-      <animate attributeName="r" values="3;6;3" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="40" cy="240" r="4" fill="#00ffff" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="120" r="5" fill="url(#pulsatingNode)" filter="url(#pulseGlow)">
-      <animate attributeName="r" values="5;12;5" dur="3.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="80" cy="240" r="3" fill="#8a2be2">
-      <animate attributeName="fill" values="#8a2be2;#ff00ff;#8a2be2" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="100" cy="320" r="4" fill="url(#nodeGlow)">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="30" cy="260" r="2" fill="#ff00ff">
-      <animate attributeName="r" values="2;5;2" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="60" cy="260" r="3" fill="url(#pulsatingNode)">
-      <animate attributeName="r" values="3;8;3" dur="2.3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <circle cx="90" cy="260" r="2" fill="#4169e1">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.4s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Connecting Neural Lines for Final A -->
-    <path d="M20,320 Q30,280 40,240" stroke="url(#neuralFlow1)" stroke-width="2" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M40,240 Q50,180 60,120" stroke="#00ffff" stroke-width="2.5" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,120;120,0;0,120" dur="4.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,120 Q70,180 80,240" stroke="url(#neuralFlow2)" stroke-width="2" fill="none" opacity="0.9">
-      <animate attributeName="stroke-width" values="2;4;2" dur="2.7s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M80,240 Q90,280 100,320" stroke="#8a2be2" stroke-width="2" fill="none">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2.4s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M30,260 L60,260" stroke="url(#neuralFlow1)" stroke-width="3" fill="none">
-      <animate attributeName="stroke-dasharray" values="0,30;30,0;0,30" dur="2.3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M60,260 L90,260" stroke="#ff00ff" stroke-width="2.5" fill="none" opacity="0.8">
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.1s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- ===== INTER-LETTER NEURAL CONNECTIONS ===== -->
-  <!-- Complex neural pathways connecting letters -->
-  <g id="interLetterConnections" opacity="0.6">
-    <!-- D to A connection -->
-    <path d="M260,180 Q300,160 340,180" stroke="url(#neuralFlow1)" stroke-width="1.5" fill="none" opacity="0.5">
-      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="4s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-dasharray" values="0,80;80,0;0,80" dur="5s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- A to T connection -->
-    <path d="M380,200 Q400,190 420,200" stroke="url(#neuralFlow2)" stroke-width="1.8" fill="none" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- T to A connection -->
-    <path d="M480,160 Q500,150 520,160" stroke="#ff00ff" stroke-width="1.6" fill="none" opacity="0.6">
-      <animate attributeName="stroke-dasharray" values="0,40;40,0;0,40" dur="3.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- A to K connection -->
-    <path d="M600,220 Q630,210 660,220" stroke="url(#neuralFlow1)" stroke-width="1.7" fill="none" opacity="0.5">
-      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="4.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- K to A connection -->
-    <path d="M760,200 Q780,190 800,200" stroke="#8a2be2" stroke-width="1.5" fill="none" opacity="0.4">
-      <animate attributeName="stroke-dasharray" values="0,40;40,0;0,40" dur="3.2s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- A to R connection -->
-    <path d="M880,180 Q900,170 920,180" stroke="url(#neuralFlow2)" stroke-width="1.8" fill="none" opacity="0.6">
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="3.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- R to Y connection -->
-    <path d="M1000,200 Q1020,190 1040,200" stroke="#00ffff" stroke-width="1.6" fill="none" opacity="0.5">
-      <animate attributeName="stroke-dasharray" values="0,40;40,0;0,40" dur="4s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Y to A connection -->
-    <path d="M1120,180 Q1140,170 1160,180" stroke="url(#neuralFlow1)" stroke-width="1.7" fill="none" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3.6s" repeatCount="indefinite"/>
-    </path>
-
-    <!-- Vertical inter-connections -->
-    <path d="M200,100 Q600,80 1000,100" stroke="url(#neuralFlow2)" stroke-width="1.2" fill="none" opacity="0.3">
-      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-dasharray" values="0,800;800,0;0,800" dur="8s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M200,340 Q600,360 1000,340" stroke="#ff00ff" stroke-width="1.3" fill="none" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="5.5s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-dasharray" values="0,800;800,0;0,800" dur="7s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- ===== FLOATING ENERGY PARTICLES ===== -->
-  <!-- Dynamic particle system around the text -->
-  <g id="floatingParticles">
-    <!-- Particle 1 -->
-    <circle cx="300" cy="100" r="2" fill="#ff00ff" opacity="0.8">
-      <animate attributeName="cy" values="100;80;100" dur="4s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 2 -->
-    <circle cx="500" cy="350" r="1.5" fill="#00ffff" opacity="0.6">
-      <animate attributeName="cx" values="500;520;500" dur="5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 3 -->
-    <circle cx="750" cy="90" r="2.5" fill="#8a2be2" opacity="0.7">
-      <animate attributeName="cy" values="90;70;90" dur="3.5s" repeatCount="indefinite"/>
-      <animate attributeName="cx" values="750;760;750" dur="4.2s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="2.5;5;2.5" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 4 -->
-    <circle cx="950" cy="360" r="1.8" fill="#4169e1" opacity="0.5">
-      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" repeatCount="indefinite"/>
-      <animate attributeName="cx" values="950;930;950" dur="4.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 5 -->
-    <circle cx="200" cy="200" r="1.2" fill="#ff00ff" opacity="0.4">
-      <animateTransform attributeName="transform" type="rotate" values="0 200 200;360 200 200" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 6 -->
-    <circle cx="1100" cy="150" r="2.2" fill="#00ffff" opacity="0.6">
-      <animate attributeName="cy" values="150;130;150" dur="3.8s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="2.2;4.5;2.2" dur="2.5s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#00ffff;#ff00ff;#00ffff" dur="4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 7 -->
-    <circle cx="400" cy="300" r="1.6" fill="#8a2be2" opacity="0.7">
-      <animateTransform attributeName="transform" type="translate" values="0,0;20,10;0,0" dur="5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 8 -->
-    <circle cx="650" cy="80" r="1.4" fill="#4169e1" opacity="0.5">
-      <animate attributeName="cx" values="650;670;650" dur="4.8s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="80;60;80" dur="3.2s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="1.4;3.2;1.4" dur="2.7s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 9 -->
-    <circle cx="850" cy="350" r="2" fill="#ff00ff" opacity="0.6">
-      <animateTransform attributeName="transform" type="rotate" values="0 850 350;-360 850 350" dur="7s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Particle 10 -->
-    <circle cx="1050" cy="300" r="1.3" fill="#00ffff" opacity="0.4">
-      <animate attributeName="cy" values="300;320;300" dur="4.2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.8s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#00ffff;#8a2be2;#00ffff" dur="3.5s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-  <!-- ===== ADVANCED NEURAL PULSE WAVES ===== -->
-  <!-- Ripple effects emanating from key nodes -->
-  <g id="neuralWaves" opacity="0.4">
-    <!-- Wave from center of D -->
-    <circle cx="200" cy="220" r="10" fill="none" stroke="url(#neuralFlow1)" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="10;80;150" dur="4s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0;0.8;0" dur="4s" repeatCount="indefinite"/>
-      <animate attributeName="stroke-width" values="1;3;0.5" dur="4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Wave from apex of first A -->
-    <circle cx="300" cy="120" r="8" fill="none" stroke="#ff00ff" stroke-width="1.5" opacity="0">
-      <animate attributeName="r" values="8;60;120" dur="5s" repeatCount="indefinite" begin="1s"/>
-      <animate attributeName="opacity" values="0;0.7;0" dur="5s" repeatCount="indefinite" begin="1s"/>
-      <animate attributeName="stroke-width" values="1.5;2.5;0.5" dur="5s" repeatCount="indefinite" begin="1s"/>
-    </circle>
-    
-    <!-- Wave from center of K -->
-    <circle cx="680" cy="220" r="12" fill="none" stroke="url(#neuralFlow2)" stroke-width="2" opacity="0">
-      <animate attributeName="r" values="12;90;180" dur="6s" repeatCount="indefinite" begin="2s"/>
-      <animate attributeName="opacity" values="0;0.6;0" dur="6s" repeatCount="indefinite" begin="2s"/>
-      <animate attributeName="stroke-width" values="2;4;0.5" dur="6s" repeatCount="indefinite" begin="2s"/>
-    </circle>
-    
-    <!-- Wave from center of Y -->
-    <circle cx="1040" cy="200" r="15" fill="none" stroke="#8a2be2" stroke-width="1.8" opacity="0">
-      <animate attributeName="r" values="15;70;140" dur="4.5s" repeatCount="indefinite" begin="0.5s"/>
-      <animate attributeName="opacity" values="0;0.9;0" dur="4.5s" repeatCount="indefinite" begin="0.5s"/>
-      <animate attributeName="stroke-width" values="1.8;3.5;0.8" dur="4.5s" repeatCount="indefinite" begin="0.5s"/>
-    </circle>
-  </g>
-
-  <!-- ===== DYNAMIC ENERGY STREAMS ===== -->
-  <!-- Flowing energy streams throughout the logo -->
-  <g id="energyStreams" opacity="0.7">
-    <!-- Horizontal energy stream -->
-    <path d="M50,220 Q200,200 350,220 T650,200 Q800,220 950,200 T1150,220" 
-          stroke="url(#neuralFlow1)" stroke-width="3" fill="none" opacity="0.5">
-      <animate attributeName="stroke-dasharray" values="0,1200;600,600;1200,0;0,1200" dur="8s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Vertical energy streams -->
-    <path d="M200,50 Q220,150 200,250 T200,350" 
-          stroke="#ff00ff" stroke-width="2" fill="none" opacity="0.4">
-      <animate attributeName="stroke-dasharray" values="0,300;150,150;300,0;0,300" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M600,50 Q580,150 600,250 T600,350" 
-          stroke="url(#neuralFlow2)" stroke-width="2.5" fill="none" opacity="0.6">
-      <animate attributeName="stroke-dasharray" values="0,300;150,150;300,0;0,300" dur="5.5s" repeatCount="indefinite" begin="1s"/>
-      <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M1000,50 Q1020,150 1000,250 T1000,350" 
-          stroke="#00ffff" stroke-width="2.2" fill="none" opacity="0.5">
-      <animate attributeName="stroke-dasharray" values="0,300;150,150;300,0;0,300" dur="7s" repeatCount="indefinite" begin="2s"/>
-      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.8s" repeatCount="indefinite"/>
-    </path>
-    
-    <!-- Diagonal energy streams -->
-    <path d="M100,100 Q400,200 700,100 Q900,200 1100,100" 
-          stroke="url(#neuralFlow1)" stroke-width="1.8" fill="none" opacity="0.3">
-      <animate attributeName="stroke-dasharray" values="0,1000;500,500;1000,0;0,1000" dur="9s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="4.5s" repeatCount="indefinite"/>
-    </path>
-    
-    <path d="M100,340 Q400,240 700,340 Q900,240 1100,340" 
-          stroke="#8a2be2" stroke-width="1.6" fill="none" opacity="0.4">
-      <animate attributeName="stroke-dasharray" values="0,1000;500,500;1000,0;0,1000" dur="8.5s" repeatCount="indefinite" begin="1.5s"/>
-      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3.8s" repeatCount="indefinite"/>
-    </path>
-  </g>
-
-  <!-- ===== PULSATING CORE NODES ===== -->
-  <!-- Major neural hubs with intense activity -->
-  <g id="coreNodes" filter="url(#pulseGlow)">
-    <!-- Core node at D -->
-    <circle cx="200" cy="220" r="8" fill="url(#pulsatingNode)" opacity="0.8">
-      <animate attributeName="r" values="8;15;8" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at first A apex -->
-    <circle cx="300" cy="120" r="6" fill="#ff00ff" opacity="0.9">
-      <animate attributeName="r" values="6;12;6" dur="2.3s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.8s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#ff00ff;#00ffff;#ff00ff" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at T center -->
-    <circle cx="420" cy="220" r="7" fill="url(#nodeGlow)" opacity="0.7">
-      <animate attributeName="r" values="7;14;7" dur="2.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at K junction -->
-    <circle cx="680" cy="220" r="9" fill="url(#pulsatingNode)" opacity="0.8">
-      <animate attributeName="r" values="9;16;9" dur="2.2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at R center -->
-    <circle cx="920" cy="200" r="6.5" fill="#8a2be2" opacity="0.9">
-      <animate attributeName="r" values="6.5;13;6.5" dur="2.4s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.7s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#8a2be2;#ff00ff;#8a2be2" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at Y junction -->
-    <circle cx="1040" cy="200" r="8.5" fill="url(#nodeGlow)" opacity="0.8">
-      <animate attributeName="r" values="8.5;17;8.5" dur="2.1s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.9s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Core node at final A apex -->
-    <circle cx="1160" cy="120" r="7.2" fill="#00ffff" opacity="0.9">
-      <animate attributeName="r" values="7.2;14.5;7.2" dur="2.6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.9;1;0.9" dur="1.4s" repeatCount="indefinite"/>
-      <animate attributeName="fill" values="#00ffff;#ff00ff;#00ffff" dur="3.2s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-  <!-- ===== NEURAL SYNAPTIC FLASHES ===== -->
-  <!-- Brief intense flashes at random intervals -->
-  <g id="synapticFlashes">
-    <!-- Flash 1 -->
-    <circle cx="180" cy="160" r="3" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.3s" begin="2s;7s;12s;17s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="3;12;3" dur="0.3s" begin="2s;7s;12s;17s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Flash 2 -->
-    <circle cx="320" cy="280" r="2.5" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.4s" begin="3.5s;8.5s;13.5s;18.5s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="2.5;10;2.5" dur="0.4s" begin="3.5s;8.5s;13.5s;18.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Flash 3 -->
-    <circle cx="580" cy="140" r="4" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.2s" begin="1s;6s;11s;16s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="4;15;4" dur="0.2s" begin="1s;6s;11s;16s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Flash 4 -->
-    <circle cx="720" cy="300" r="3.5" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.35s" begin="4s;9s;14s;19s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="3.5;13;3.5" dur="0.35s" begin="4s;9s;14s;19s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Flash 5 -->
-    <circle cx="960" cy="150" r="2.8" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.25s" begin="2.8s;7.8s;12.8s;17.8s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="2.8;11;2.8" dur="0.25s" begin="2.8s;7.8s;12.8s;17.8s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Flash 6 -->
-    <circle cx="1080" cy="280" r="3.2" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;1;0" dur="0.3s" begin="5s;10s;15s;20s" repeatCount="indefinite"/>
-      <animate attributeName="r" values="3.2;12.5;3.2" dur="0.3s" begin="5s;10s;15s;20s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-  <!-- ===== AMBIENT GLOW OVERLAY ===== -->
-  <!-- Subtle ambient lighting effects -->
-  <g id="ambientGlow" opacity="0.2">
-    <ellipse cx="200" cy="220" rx="120" ry="80" fill="url(#nodeGlow)" opacity="0.3">
-      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="8s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.2;1" dur="6s" repeatCount="indefinite"/>
-    </ellipse>
-    
-    <ellipse cx="600" cy="220" rx="150" ry="100" fill="url(#pulsatingNode)" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.7;0.4" dur="9s" repeatCount="indefinite" begin="2s"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.3;1" dur="7s" repeatCount="indefinite" begin="2s"/>
-    </ellipse>
-    
-    <ellipse cx="1000" cy="220" rx="130" ry="90" fill="#8a2be2" opacity="0.25">
-      <animate attributeName="opacity" values="0.25;0.55;0.25" dur="10s" repeatCount="indefinite" begin="4s"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.25;1" dur="8s" repeatCount="indefinite" begin="4s"/>
-    </ellipse>
-  </g>
-
-  <!-- ===== FINAL TEXT OVERLAY ===== -->
-  <!-- The actual text with subtle glow -->
-  <text x="600" y="220" font-family="Arial, sans-serif" font-size="120" font-weight="bold" 
-        text-anchor="middle" fill="none" stroke="url(#neuralFlow1)" stroke-width="2" 
-        filter="url(#neuralGlow)" opacity="0.8">
-    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="stroke-width" values="2;3;2" dur="3s" repeatCount="indefinite"/>
-  </text>
-  
-
-  <!-- ===== NEURAL NETWORK COMPLETION INDICATORS ===== -->
-  <!-- Progress indicators showing neural network "training" -->
-  <g id="completionIndicators" transform="translate(50, 50)">
-    <!-- Progress ring 1 -->
-    <circle cx="0" cy="0" r="15" fill="none" stroke="url(#neuralFlow1)" stroke-width="2" 
-            stroke-dasharray="0,94" opacity="0.7">
-      <animate attributeName="stroke-dasharray" values="0,94;47,47;94,0;0,94" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Progress ring 2 -->
-    <circle cx="1100" cy="0" r="12" fill="none" stroke="#ff00ff" stroke-width="1.8" 
-            stroke-dasharray="0,75" opacity="0.8">
-      <animate attributeName="stroke-dasharray" values="0,75;37.5,37.5;75,0;0,75" dur="7s" repeatCount="indefinite" begin="1s"/>
-      <animate attributeName="opacity" values="0.8;1;0.8" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Progress ring 3 -->
-    <circle cx="0" cy="300" r="18" fill="none" stroke="url(#neuralFlow2)" stroke-width="2.5" 
-            stroke-dasharray="0,113" opacity="0.6">
-      <animate attributeName="stroke-dasharray" values="0,113;56.5,56.5;113,0;0,113" dur="8s" repeatCount="indefinite" begin="2s"/>
-      <animate attributeName="opacity" values="0.6;0.95;0.6" dur="4s" repeatCount="indefinite"/>
-    </circle>
-    
-    <!-- Progress ring 4 -->
-    <circle cx="1100" cy="300" r="14" fill="none" stroke="#00ffff" stroke-width="2.2" 
-            stroke-dasharray="0,88" opacity="0.75">
-      <animate attributeName="stroke-dasharray" values="0,88;44,44;88,0;0,88" dur="5.5s" repeatCount="indefinite" begin="0.5s"/>
-      <animate attributeName="opacity" values="0.75;1;0.75" dur="3.2s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-  <!-- ===== FINAL ACTIVATION SEQUENCE ===== -->
-  <!-- Simulated neural network "activation" completion -->
-  <g id="finalActivation" opacity="0">
-    <rect x="0" y="0" width="1200" height="400" fill="url(#neuralFlow1)" opacity="0.1">
-      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="0.5s" begin="10s;20s;30s" repeatCount="1"/>
-    </rect>
-    
-    <!-- Global flash effect -->
-    <rect x="0" y="0" width="1200" height="400" fill="#ffffff" opacity="0">
-      <animate attributeName="opacity" values="0;0.2;0" dur="0.2s" begin="10s;20s;30s" repeatCount="1"/>
-    </rect>
-    
-    <animate attributeName="opacity" values="0;1;0" dur="1s" begin="10s;20s;30s" repeatCount="1"/>
+  <!-- Main Text Elements -->
+  <g class="main-text">
+    <!-- Glow Effect Layer -->
+    <text class="logo-text data glow-effect" x="50" y="150" text-anchor="start">Data</text>
+    <text class="logo-text karya glow-effect" x="370" y="150" text-anchor="start">Karya</text>
+    
+    <!-- Main Text Layer -->
+    <text class="logo-text data" x="50" y="150" text-anchor="start">Data</text>
+    <text class="logo-text karya" x="370" y="150" text-anchor="start">Karya</text>
   </g>
 </svg>
