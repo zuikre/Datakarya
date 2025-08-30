@@ -4350,3 +4350,15 @@ async function handleFormSubmit(e) {
   });
 
 })();
+
+const input = document.querySelector('.search-input');
+
+input.addEventListener('input', () => {
+  if (input.value.length > 0) {
+    input.style.boxShadow =
+      "0 0 18px rgba(0,255,200,0.7), 0 0 28px rgba(157,78,221,0.8)";
+  } else {
+    input.style.boxShadow =
+      "0 0 8px rgba(157,78,221,0.4), inset 0 0 4px rgba(255,255,255,0.05)";
+  }
+});
