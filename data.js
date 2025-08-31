@@ -1059,7 +1059,7 @@ int main() {
     id: 'random-forest',
     title: 'Random Forest',
     category: 'ensemble',
-    difficulty: 'intermediate',
+    difficulty: 'beginner',
     tags: ['Ensemble', 'Classification', 'Regression', 'Supervised'],
     description: 'An ensemble learning method that constructs multiple decision trees and combines their predictions for improved accuracy and robustness.',
     icon: 'tree',

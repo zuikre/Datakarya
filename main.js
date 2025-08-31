@@ -1071,36 +1071,7 @@ function closeAlgorithmDetail() {
  * @param {string} algorithmId - ID of algorithm
  * @param {HTMLElement} card - Card element to show preview in
  */
-function showCodePreview(algorithmId, card) {
-  const placeholder = card.querySelector('.visualization-placeholder');
-  
-  // Show loading state
-  placeholder.innerHTML = `
-    <div class="code-preview">
-      <pre><code class="language-python"># ${algorithmId} implementation\n\n# Loading code preview...</code></pre>
-    </div>
-  `;
-  
-  // Load actual code after delay
-  setTimeout(() => {
-    const algorithm = ALGORITHMS.find(a => a.id === algorithmId);
-    const codeElement = placeholder.querySelector('code');
-    
-    if (algorithm && algorithm.implementations && algorithm.implementations.python) {
-      codeElement.textContent = algorithm.implementations.python.code;
-    } else {
-      codeElement.textContent = '# Code example not available';
-    }
-    
-    // Apply syntax highlighting
-    if (window.hljs) {
-      hljs.highlightElement(codeElement);
-    }
-    
-    // Add copy button
-    addCopyButton(placeholder);
-  }, 500);
-}
+
 
 /**
  * Add copy button to code preview
@@ -1224,6 +1195,10 @@ function navigateAlgorithm(e) {
 // SECTION: Algorithm Data Generation
 // =============================================
 
+// =============================================
+// SECTION: Algorithm Data Generation
+// =============================================
+
 /**
  * Generate algorithm cards and add to DOM
  */
@@ -1239,38 +1214,57 @@ function generateAlgorithmCards() {
     card.className = 'algorithm-card';
     card.dataset.category = algorithm.category;
     card.dataset.difficulty = algorithm.difficulty;
-    card.dataset.tags = algorithm.tags.join(',').toLowerCase();
+    card.dataset.tags = algorithm.tags?.join(',')?.toLowerCase() || '';
+    
+    // Generate unique algorithm insights
+    const algorithmInsights = generateAlgorithmInsights(algorithm);
     
     card.innerHTML = `
       <div class="card-header">
         <div class="card-badge ${algorithm.difficulty}">
-          ${CONFIG.difficulties[algorithm.difficulty].name}
+          ${CONFIG.difficulties[algorithm.difficulty]?.name || algorithm.difficulty}
         </div>
         <h3 class="card-title">${algorithm.title}</h3>
         <div class="card-tags">
-          ${algorithm.tags.map((tag) => `<span class="tag">${tag}</span>`).join('')}
+          ${(algorithm.tags || []).map((tag) => `<span class="tag">${tag}</span>`).join('')}
         </div>
       </div>
       
       <div class="card-visualization">
-        <div class="visualization-placeholder" id="${algorithm.id}-vis">
-          <div class="placeholder-content">
-            <i class="fas fa-${algorithm.icon}"></i>
-            <span>Interactive visualization loading...</span>
+        <div class="algorithm-insights" id="${algorithm.id}-insights">
+          <div class="insights-header">
+            <div class="algorithm-icon">
+              <i class="fas fa-${algorithm.icon || 'code'}"></i>
+            </div>
+            <div class="algorithm-quick-stats">
+              <div class="stat">
+                <span class="stat-value">${getComplexityLevel(algorithm)}</span>
+                <span class="stat-label">Complexity</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">${getRealWorldUsage(algorithm)}</span>
+                <span class="stat-label">Usage</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">${getTrainingSpeed(algorithm)}</span>
+                <span class="stat-label">Speed</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="insights-content">
+            ${algorithmInsights}
           </div>
         </div>
       </div>
       
       <div class="card-description">
-        <p>${algorithm.description}</p>
+        <p>${algorithm.description || 'No description available.'}</p>
       </div>
       
       <div class="card-actions">
         <button class="action-btn explore-btn" data-algorithm="${algorithm.id}">
           <i class="fas fa-play"></i> Explore
-        </button>
-        <button class="action-btn code-btn" data-algorithm="${algorithm.id}">
-          <i class="fas fa-code"></i> Code
         </button>
       </div>
     `;
@@ -1283,8 +1277,155 @@ function generateAlgorithmCards() {
 }
 
 /**
- * Generate algorithm detail sections
+ * Generate unique algorithm insights based on algorithm properties
+ * @param {Object} algorithm - Algorithm data
+ * @returns {string} - HTML for algorithm insights
  */
+function generateAlgorithmInsights(algorithm) {
+  // Get unique properties for this algorithm
+  const uniqueProps = getUniqueProperties(algorithm);
+  
+  return `
+    <div class="key-insights">
+      ${uniqueProps.map(prop => `
+        <div class="insight">
+          <span class="insight-icon">${getPropertyIcon(prop.type)}</span>
+          <span class="insight-text">${prop.value}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/**
+ * Get unique properties that differentiate this algorithm
+ * @param {Object} algorithm - Algorithm data
+ * @returns {Array} - Array of unique properties
+ */
+function getUniqueProperties(algorithm) {
+  const props = [];
+  
+  // Add time complexity if available
+  if (algorithm.implementations?.python?.timeComplexity) {
+    props.push({
+      type: 'performance',
+      value: algorithm.implementations.python.timeComplexity
+    });
+  }
+  
+  // Add key strength from pros
+  if (algorithm.prosCons?.strengths?.length > 0) {
+    props.push({
+      type: 'strength', 
+      value: algorithm.prosCons.strengths[0]
+    });
+  }
+  
+  // Add special capability based on tags
+  if (algorithm.tags?.includes('Clustering')) {
+    props.push({
+      type: 'capability',
+      value: 'Group similar data points'
+    });
+  } else if (algorithm.tags?.includes('Classification')) {
+    props.push({
+      type: 'capability', 
+      value: 'Categorize data into classes'
+    });
+  } else if (algorithm.tags?.includes('Regression')) {
+    props.push({
+      type: 'capability',
+      value: 'Predict continuous values'
+    });
+  }
+  
+  // Ensure we have at least 3 properties
+  while (props.length < 3) {
+    props.push({
+      type: 'info',
+      value: getRandomAlgorithmFact(algorithm)
+    });
+  }
+  
+  return props.slice(0, 3);
+}
+
+/**
+ * Get icon for property type
+ * @param {string} type - Property type
+ * @returns {string} - HTML for icon
+ */
+function getPropertyIcon(type) {
+  const icons = {
+    performance: '<i class="fas fa-bolt"></i>',
+    strength: '<i class="fas fa-award"></i>',
+    capability: '<i class="fas fa-magic"></i>',
+    info: '<i class="fas fa-info-circle"></i>'
+  };
+  
+  return icons[type] || '<i class="fas fa-circle"></i>';
+}
+
+/**
+ * Get complexity level description
+ * @param {Object} algorithm - Algorithm data
+ * @returns {string} - Complexity description
+ */
+function getComplexityLevel(algorithm) {
+  const complexities = {
+    beginner: 'Low',
+    intermediate: 'Medium', 
+    advanced: 'High',
+    expert: 'Very High'
+  };
+  return complexities[algorithm.difficulty] || 'Medium';
+}
+
+/**
+ * Get real-world usage indicator
+ * @param {Object} algorithm - Algorithm data
+ * @returns {string} - Usage indicator
+ */
+function getRealWorldUsage(algorithm) {
+  // Base usage on popularity but make it more descriptive
+  const popularity = algorithm.popularity || 0.5;
+  if (popularity > 0.8) return 'Very High';
+  if (popularity > 0.6) return 'High';
+  if (popularity > 0.4) return 'Medium';
+  return 'Specialized';
+}
+
+/**
+ * Get training speed indicator
+ * @param {Object} algorithm - Algorithm data
+ * @returns {string} - Speed indicator
+ */
+function getTrainingSpeed(algorithm) {
+  // Determine speed based on algorithm type and complexity
+  if (algorithm.difficulty === 'beginner') return 'Fast';
+  if (algorithm.difficulty === 'intermediate') return 'Medium';
+  if (algorithm.difficulty === 'advanced') return 'Slow';
+  return 'Very Slow';
+}
+
+/**
+ * Get random algorithm fact (fallback function)
+ * @param {Object} algorithm - Algorithm data
+ * @returns {string} - Random fact
+ */
+function getRandomAlgorithmFact(algorithm) {
+  const facts = [
+    'Widely used in industry',
+    'Good for large datasets',
+    'Easy to implement',
+    'Handles non-linear data well',
+    'Robust to outliers',
+    'Works with various data types'
+  ];
+  
+  return facts[Math.floor(Math.random() * facts.length)];
+}
+
 /**
  * Generate algorithm detail sections
  */
@@ -1408,6 +1549,81 @@ function generateAlgorithmDetailHTML(algorithm) {
         <div class="progress-bar">
           <div class="progress-fill" style="width: 0%"></div>
         </div>
+      </div>
+    </div>
+  `;
+}
+
+
+/**
+ * Generate concept tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+function generateConceptTab(algorithm) {
+  return `
+    <div class="tab-pane active" id="concept-tab">
+      <div class="concept-container">
+        <div class="concept-intro">
+          <h4>Core Concept</h4>
+          <p>${algorithm.concept.overview}</p>
+          
+          <div class="concept-analogy">
+            <h5>Real-world Analogy</h5>
+            <p>${algorithm.concept.analogy}</p>
+          </div>
+          
+          <div class="concept-history">
+            <h5>History & Development</h5>
+            <p>${algorithm.concept.history}</p>
+          </div>
+        </div>
+        
+        ${algorithm.concept.mathematicalFormulation ? `
+        <div class="concept-formula">
+          <h4>Mathematical Foundation</h4>
+          <div class="formula-box">
+            ${algorithm.concept.mathematicalFormulation.equation ? `
+            <div class="formula-display">
+              ${algorithm.concept.mathematicalFormulation.equation}
+            </div>
+            ` : ''}
+            <div class="formula-legend">
+              <ul>
+                ${algorithm.concept.mathematicalFormulation.variables ? algorithm.concept.mathematicalFormulation.variables.map(varItem => `
+                  <li><strong>${varItem.symbol}</strong>: ${varItem.description}</li>
+                `).join('') : ''}
+              </ul>
+
+            </div>
+          </div>
+          
+          ${algorithm.concept.mathematicalFormulation.costFunction ? `
+          <div class="formula-details">
+            <h5>Cost Function</h5>
+            <p>${algorithm.concept.mathematicalFormulation.costFunction}</p>
+          </div>
+          ` : ''}
+          
+          ${algorithm.concept.mathematicalFormulation.optimization ? `
+          <div class="formula-details">
+            <h5>Optimization</h5>
+            <p>${algorithm.concept.mathematicalFormulation.optimization}</p>
+          </div>
+          ` : ''}
+        </div>
+        ` : ''}
+        
+        ${algorithm.concept.assumptions ? `
+        <div class="concept-assumptions">
+          <h4>Key Assumptions</h4>
+          <ul>
+            ${algorithm.concept.assumptions.map(assumption => `
+            <li>${assumption}</li>
+            `).join('')}
+          </ul>
+        </div>
+        ` : ''}
       </div>
     </div>
   `;
@@ -1768,6 +1984,464 @@ document.addEventListener('click', function (e) {
 });
 
 
+/**
+ * Generate visualization tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+// ✅ Safe version with fallback if visualization or parameters are missing
+// Updated functions for main.js
+
+function generateVisualizationTab(algorithm) {
+  const visualization = algorithm.visualization || {};
+
+  const defaultParams = {
+    interactive: true,
+    show_grid: true,
+    show_axes: true,
+    animation_duration: 1500
+  };
+
+  const visualizationParams = {
+    ...defaultParams,
+    ...(visualization.parameters || {})
+  };
+
+  return `
+    <div class="tab-pane" id="visualization-tab">
+      <div class="visualization-container">
+
+        <!-- Dynamic controls -->
+        <div class="visualization-controls-dynamic" id="${algorithm.id}-controls">
+          <div class="controls-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading interactive controls...</p>
+          </div>
+        </div>
+
+        <!-- Visualization canvas -->
+        <div class="visualization-canvas" id="${algorithm.id}-visualization">
+          <div class="visualization-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading interactive visualization...</p>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="visualization-actions">
+          <div class="action-buttons">
+            <button class="btn-secondary reset-visualization" data-algorithm="${algorithm.id}">
+              <i class="fas fa-redo"></i> Reset
+            </button>
+            <button class="btn-primary animate-visualization" data-algorithm="${algorithm.id}">
+              <i class="fas fa-play"></i> Restart Animation
+            </button>
+
+            ${visualization.types && visualization.types.length > 1 ? `
+              <select class="visualization-type-selector" data-algorithm="${algorithm.id}">
+                ${visualization.types.map(type => `
+                  <option value="${type.value}" ${type.default ? 'selected' : ''}>${type.label}</option>
+                `).join('')}
+              </select>
+            ` : ''}
+
+            <div class="visualization-toggles">
+              <button class="btn-toggle ${visualizationParams.show_grid ? 'active' : ''}" 
+                data-algorithm="${algorithm.id}" data-param="show_grid" title="Toggle Grid">
+                <i class="fas fa-border-style"></i>
+              </button>
+              <button class="btn-toggle ${visualizationParams.show_axes ? 'active' : ''}" 
+                data-algorithm="${algorithm.id}" data-param="show_axes" title="Toggle Axes">
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization info -->
+        <div class="visualization-info">
+          <div class="visualization-description">
+            <h4>${algorithm.title} Visualization</h4>
+            <p>${visualization.description || `Interact with the visualization to understand how ${algorithm.title} works.`}</p>
+          </div>
+
+          ${visualization.instructions ? `
+            <div class="visualization-instructions">
+              <h5><i class="fas fa-lightbulb"></i> How to Use:</h5>
+              <ul>
+                ${visualization.instructions.map(ins => `<li>${ins}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+
+          ${visualization.performanceTips ? `
+            <div class="visualization-tips">
+              <h5><i class="fas fa-info-circle"></i> Performance Tips:</h5>
+              <ul>
+                ${visualization.performanceTips.map(tip => `<li>${tip}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+
+          <div class="visualization-parameters">
+            <h5><i class="fas fa-sliders-h"></i> Current Parameters:</h5>
+            <div id="${algorithm.id}-params-display"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+
+/**
+ * Initialize visualizer
+ */
+window.initVisualizer = function(algorithmId) {
+  if (!algorithmId) {
+    console.warn('initVisualizer called without algorithm ID');
+    return;
+  }
+  
+  const algorithm = ALGORITHMS?.find(a => a.id === algorithmId);
+  if (!algorithm || !algorithm.visualization) {
+    console.warn('No visualization configuration found for algorithm:', algorithmId);
+    showVisualizationError(`${algorithmId}-visualization`, 'No visualization available for this algorithm');
+    return;
+  }
+  
+  const visualization = algorithm.visualization;
+  const containerId = `${algorithmId}-visualization`;
+  const controlsContainerId = `${algorithmId}-controls`;
+  
+  // Remove loading indicator
+  const loadingElement = document.querySelector(`#${containerId} .visualization-loading`);
+  if (loadingElement) {
+    loadingElement.style.display = 'none';
+  }
+  
+  // Get visualization configuration
+  const visualizationType = visualization.defaultType || 'default';
+  const params = {
+    ...visualization.parameters,
+    interactive: true,
+    controlsContainer: controlsContainerId
+  };
+  
+  // Get the visualizer function using the visualizerKey
+  const visualizerFn = window.visualizers[visualization.visualizerKey];
+  if (visualizerFn) {
+    try {
+      visualizerFn(containerId, visualizationType, params);
+      setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, params);
+    } catch (error) {
+      console.error('Error initializing visualizer:', error);
+      showVisualizationError(containerId, error.message);
+    }
+  } else {
+    console.warn('No visualizer function found for key:', visualization.visualizerKey);
+    showVisualizationError(containerId, `Visualizer "${visualization.visualizerKey}" not found`);
+  }
+};
+
+/**
+ * Setup visualization event handlers
+ */
+function setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, baseParams) {
+  const visualization = algorithm.visualization;
+  
+  // Reset button handler
+  const resetBtn = document.querySelector(`.reset-visualization[data-algorithm="${algorithmId}"]`);
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      // Clear the canvas and reinitialize
+      const canvas = document.querySelector(`#${containerId} canvas`);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // Clear controls container
+      const controlsContainer = document.getElementById(`${algorithmId}-controls`);
+      if (controlsContainer) {
+        controlsContainer.innerHTML = '';
+      }
+      
+      // Reinitialize with default parameters
+      const defaultParams = {
+        ...visualization.parameters,
+        interactive: true,
+        controlsContainer: `${algorithmId}-controls`
+      };
+      
+      visualizerFn(containerId, visualization.defaultType, defaultParams);
+    });
+  }
+  
+  // Animate button handler
+  const animateBtn = document.querySelector(`.animate-visualization[data-algorithm="${algorithmId}"]`);
+  if (animateBtn) {
+    animateBtn.addEventListener('click', () => {
+      // Get current parameters from controls if they exist
+      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
+      visualizerFn(containerId, getCurrentVisualizationType(algorithmId, visualization), currentParams);
+    });
+  }
+  
+  // Visualization type selector handler
+  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
+  if (typeSelector) {
+    typeSelector.addEventListener('change', (e) => {
+      const newType = e.target.value;
+      const currentParams = getCurrentVisualizationParams(algorithmId, baseParams);
+      visualizerFn(containerId, newType, currentParams);
+    });
+  }
+}
+
+/**
+ * Helper function to get current visualization parameters
+ */
+function getCurrentVisualizationParams(algorithmId, baseParams) {
+  // This would extract current values from the dynamic controls
+  // For now, return the base params
+  return {
+    ...baseParams,
+    forceRestart: true
+  };
+}
+
+/**
+ * Helper function to get current visualization type
+ */
+function getCurrentVisualizationType(algorithmId, visualization) {
+  const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
+  return typeSelector ? typeSelector.value : visualization.defaultType;
+}
+
+/**
+ * Show visualization error
+ */
+function showVisualizationError(containerId, message) {
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = `
+      <div class="visualization-error">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="error-content">
+          <h4>Visualization Unavailable</h4>
+          <p>${message}</p>
+          <small>Please check the console for technical details.</small>
+        </div>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Initialize visualization
+ */
+function initializeVisualization(algorithmId) {
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => initVisualizer(algorithmId), 100);
+    });
+  } else {
+    setTimeout(() => initVisualizer(algorithmId), 100);
+  }
+}
+
+
+/**
+ * Generate pros & cons tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+function generateProsConsTab(algorithm) {
+  return `
+    <div class="tab-pane" id="proscons-tab">
+      <div class="proscons-container">
+        <div class="pros-box">
+          <h4><i class="fas fa-check-circle"></i> Strengths</h4>
+          <ul>
+            ${algorithm.prosCons.strengths.map(strength => `
+            <li>${strength}</li>
+            `).join('')}
+          </ul>
+        </div>
+        
+        <div class="cons-box">
+          <h4><i class="fas fa-times-circle"></i> Weaknesses</h4>
+          <ul>
+            ${algorithm.prosCons.weaknesses.map(weakness => `
+            <li>${weakness}</li>
+            `).join('')}
+          </ul>
+        </div>
+        
+        ${algorithm.comparisons ? `
+        <div class="comparison-box">
+          <h4><i class="fas fa-not-equal"></i> Comparisons</h4>
+          <div class="comparison-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Comparison</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${algorithm.comparisons.map(comp => `
+                <tr>
+                  <td>${comp.algorithm}</td>
+                  <td>${comp.comparison}</td>
+                </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Generate use cases tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+function generateUsesTab(algorithm) {
+  const useCases = algorithm.useCases || [];
+
+  return `
+    <div class="tab-pane" id="uses-tab">
+      <div class="uses-container">
+        <h4 class="uses-title">Real-world Applications</h4>
+
+        ${useCases.length > 0 ? useCases.map(useCase => `
+          <article class="use-case-card">
+            <div class="use-case-icon">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <div class="use-case-content">
+              <h5 class="use-case-title">${useCase.title}</h5>
+              <p class="use-case-description">${useCase.description}</p>
+              ${useCase.dataset ? `
+              <div class="use-case-dataset">
+                <i class="fas fa-database"></i> 
+                Dataset: 
+                <a href="${useCase.datasetLink || '#'}" target="_blank" rel="noopener noreferrer">
+                  ${useCase.dataset}
+                </a>
+              </div>
+              ` : ''}
+            </div>
+          </article>
+        `).join('') : `
+          <p class="no-use-cases">No use cases available for this algorithm.</p>
+        `}
+
+        <div class="use-case-actions">
+          <button class="btn-secondary">
+            <i class="fas fa-book"></i> Read Case Studies
+          </button>
+          <button class="btn-primary">
+            <i class="fas fa-play"></i> Watch Applications
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+/**
+ * Generate quiz tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+function generateQuizTab(algorithm) {
+  return `
+    <div class="tab-pane" id="quiz-tab">
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <h4>Test Your Understanding</h4>
+          <p>Complete this quiz to earn XP and track your progress</p>
+        </div>
+        
+        <div class="quiz-questions">
+          ${algorithm.quiz && Array.isArray(algorithm.quiz) ? algorithm.quiz.map((question, index) => `
+            <div class="question-card">
+              <div class="question-text">
+                ${index + 1}. ${question.question}
+              </div>
+              <div class="question-options">
+                ${question.options && Array.isArray(question.options) ? question.options.map((option, optIndex) => `
+                  <label class="option">
+                    <input type="radio" name="q${index}" value="${optIndex}" 
+                    data-correct="${question.correct === optIndex}">
+                    <span class="option-text">${option}</span>
+                  </label>
+                `).join('') : ''}
+              </div>
+            </div>
+          `).join('') : ''}
+        </div>
+        
+        <div class="quiz-actions">
+          <button class="btn-secondary reset-quiz">
+            <i class="fas fa-redo"></i> Reset Quiz
+          </button>
+          <button class="btn-primary submit-quiz">
+            <i class="fas fa-check"></i> Submit Quiz
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Generate projects tab content
+ * @param {Object} algorithm - Algorithm data
+ * @return {string} - Generated HTML
+ */
+function generateProjectsTab(algorithm) {
+  return `
+    <div class="tab-pane" id="projects-tab">
+      <div class="projects-container">
+        <div class="projects-header">
+          <h4>Hands-on Projects</h4>
+          <p>Apply what you've learned with these guided projects</p>
+        </div>
+        
+        <div class="projects-grid">
+          ${algorithm.projects.map((project, index) => `
+          <div class="project-card" data-project-id="${algorithm.id}-project-${index}">
+            <div class="project-badge ${project.difficulty}">
+              ${CONFIG.difficulties[project.difficulty].name}
+            </div>
+            <div class="project-content">
+              <h5>${project.title}</h5>
+              <p>${project.description}</p>
+              <div class="project-xp">
+                <i class="fas fa-star"></i> ${project.xp} XP
+              </div>
+            </div>
+          </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // =============================================
 // SECTION: Playground Functionality
 // =============================================
@@ -1990,6 +2664,961 @@ function trainingComplete() {
   };
   
   showPlaygroundResults();
+}
+
+/**
+ * Show playground training results
+ */
+function showPlaygroundResults() {
+  const resultsContainer = DOM.playgroundForm.querySelector('.playground-results');
+  if (!resultsContainer || !STATE.playground.results) return;
+  
+  resultsContainer.innerHTML = `
+    <div class="results-header">
+      <h4>Training Results</h4>
+    </div>
+    <div class="results-metrics">
+      <div class="metric">
+        <div class="metric-value">${STATE.playground.results.accuracy}</div>
+        <div class="metric-label">Accuracy</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">${STATE.playground.results.loss}</div>
+        <div class="metric-label">Loss</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">${STATE.playground.results.time}s</div>
+        <div class="metric-label">Time</div>
+      </div>
+    </div>
+    <div class="results-actions">
+      <button class="btn-secondary">
+        <i class="fas fa-chart-line"></i> View Metrics
+      </button>
+      <button class="btn-primary">
+        <i class="fas fa-download"></i> Export Model
+      </button>
+    </div>
+  `;
+}
+
+// =============================================
+// SECTION: Projects Functionality
+// =============================================
+
+/**
+ * Initialize projects section
+ */
+function initProjects() {
+  if (!DOM.projectsSection) return;
+  
+  // Load saved projects
+  const savedProjects = localStorage.getItem(CONFIG.storageKeys.userProjects);
+  if (savedProjects) {
+    try {
+      STATE.userProjects = JSON.parse(savedProjects);
+    } catch (e) {
+      console.error('Failed to parse projects data', e);
+    }
+  }
+  
+  // Generate projects grid
+  updateProjectsGrid();
+}
+
+/**
+ * Update projects grid display
+ */
+function updateProjectsGrid() {
+  const projectsGrid = DOM.projectsSection.querySelector('.projects-grid');
+  if (!projectsGrid) return;
+  
+  projectsGrid.innerHTML = '';
+  
+  // Add algorithm projects
+  ALGORITHMS.forEach(algorithm => {
+    algorithm.projects.forEach((project, index) => {
+      const projectId = `${algorithm.id}-project-${index}`;
+      const isCompleted = STATE.completedProjects.includes(projectId);
+      
+      const projectCard = document.createElement('div');
+      projectCard.className = `project-card ${isCompleted ? 'completed' : ''}`;
+      projectCard.dataset.projectId = projectId;
+      
+      projectCard.innerHTML = `
+        <div class="project-badge ${project.difficulty}">
+          ${CONFIG.difficulties[project.difficulty].name}
+        </div>
+        <div class="project-content">
+          <h5>${project.title}</h5>
+          <p>${algorithm.title} Project</p>
+          <div class="project-status">
+            ${isCompleted ? `
+            <span class="completed-badge">
+              <i class="fas fa-check-circle"></i> Completed
+            </span>
+            ` : `
+            <span class="incomplete-badge">
+              <i class="fas fa-circle"></i> Incomplete
+            </span>
+            `}
+          </div>
+        </div>
+      `;
+      
+      projectsGrid.appendChild(projectCard);
+    });
+  });
+  
+  // Add user projects
+  STATE.userProjects.forEach(project => {
+    const projectCard = document.createElement('div');
+    projectCard.className = `project-card ${project.completed ? 'completed' : ''}`;
+    projectCard.dataset.projectId = project.id;
+    
+    projectCard.innerHTML = `
+      <div class="project-badge ${project.difficulty || 'intermediate'}">
+        ${project.difficulty ? CONFIG.difficulties[project.difficulty].name : 'Custom'}
+      </div>
+      <div class="project-content">
+        <h5>${project.title}</h5>
+        <p>Custom Project</p>
+        <div class="project-status">
+          ${project.completed ? `
+          <span class="completed-badge">
+            <i class="fas fa-check-circle"></i> Completed
+          </span>
+          ` : `
+          <span class="incomplete-badge">
+            <i class="fas fa-circle"></i> Incomplete
+          </span>
+          `}
+        </div>
+      </div>
+    `;
+    
+    projectsGrid.appendChild(projectCard);
+  });
+}
+
+/**
+ * Show project detail view
+ * @param {string} projectId - ID of project to show
+ */
+function showProjectDetail(projectId) {
+  // Check if it's a predefined algorithm project
+  const algorithmProjectMatch = projectId.match(/^(.+)-project-(\d+)$/);
+  
+  if (algorithmProjectMatch) {
+    const algorithmId = algorithmProjectMatch[1];
+    const projectIndex = parseInt(algorithmProjectMatch[2]);
+    const algorithm = ALGORITHMS.find(a => a.id === algorithmId);
+    
+    if (algorithm && algorithm.projects[projectIndex]) {
+      showAlgorithmProjectDetail(algorithm, algorithm.projects[projectIndex], projectId);
+      return;
+    }
+  }
+  
+  // Otherwise it's a user project
+  const project = STATE.userProjects.find(p => p.id === projectId);
+  if (project) {
+    showUserProjectDetail(project);
+  }
+}
+
+/**
+ * Show algorithm project detail
+ * @param {Object} algorithm - Algorithm data
+ * @param {Object} project - Project data
+ * @param {string} projectId - Full project ID
+ */
+function showAlgorithmProjectDetail(algorithm, project, projectId) {
+  const isCompleted = STATE.completedProjects.includes(projectId);
+  
+  const modal = document.createElement('div');
+  modal.className = 'project-modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>${project.title}</h3>
+        <button class="close-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="project-meta">
+          <span class="badge ${project.difficulty}">
+            ${CONFIG.difficulties[project.difficulty].name}
+          </span>
+          <span class="algorithm-badge">
+            <i class="fas fa-project-diagram"></i> ${algorithm.title}
+          </span>
+          <span class="xp-badge">
+            <i class="fas fa-star"></i> ${project.xp} XP
+          </span>
+        </div>
+        
+        <div class="project-description">
+          <h4>Description</h4>
+          <p>${project.description}</p>
+        </div>
+        
+        <div class="project-steps">
+          <h4>Steps</h4>
+          <ol>
+            ${project.steps.map(step => `
+            <li>${step}</li>
+            `).join('')}
+          </ol>
+        </div>
+        
+        <div class="project-resources">
+          <h4>Resources</h4>
+          <ul>
+            <li>
+              <a href="#">
+                <i class="fas fa-file-code"></i> Starter Notebook
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-database"></i> Dataset Download
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fas fa-book"></i> Documentation
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        ${isCompleted ? `
+        <button class="btn-secondary">
+          <i class="fas fa-redo"></i> Redo Project
+        </button>
+        ` : `
+        <button class="btn-primary complete-project" data-project-id="${projectId}">
+          <i class="fas fa-check"></i> Mark as Complete
+        </button>
+        `}
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Add event listeners
+  modal.querySelector('.close-modal').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  if (!isCompleted) {
+    modal.querySelector('.complete-project').addEventListener('click', () => {
+      completeProject(projectId);
+      modal.remove();
+    });
+  }
+}
+
+/**
+ * Show user project detail
+ * @param {Object} project - Project data
+ */
+function showUserProjectDetail(project) {
+  const modal = document.createElement('div');
+  modal.className = 'project-modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>${project.title}</h3>
+        <button class="close-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="project-meta">
+          <span class="badge ${project.difficulty || 'intermediate'}">
+            ${project.difficulty ? CONFIG.difficulties[project.difficulty].name : 'Custom'}
+          </span>
+          <span class="xp-badge">
+            <i class="fas fa-star"></i> ${project.xp || 200} XP
+          </span>
+        </div>
+        
+        <div class="project-description">
+          <h4>Description</h4>
+          <p>${project.description || 'No description provided.'}</p>
+        </div>
+        
+        <div class="project-notes">
+          <h4>Your Notes</h4>
+          <textarea class="project-notes-input" placeholder="Add your project notes here...">${project.notes || ''}</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        ${project.completed ? `
+        <button class="btn-secondary">
+          <i class="fas fa-redo"></i> Redo Project
+        </button>
+        ` : `
+        <button class="btn-primary complete-project" data-project-id="${project.id}">
+          <i class="fas fa-check"></i> Mark as Complete
+        </button>
+        `}
+        <button class="btn-danger delete-project" data-project-id="${project.id}">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Add event listeners
+  modal.querySelector('.close-modal').addEventListener('click', () => {
+    saveProjectNotes(project.id, modal.querySelector('.project-notes-input').value);
+    modal.remove();
+  });
+  
+  if (!project.completed) {
+    modal.querySelector('.complete-project').addEventListener('click', () => {
+      completeProject(project.id);
+      modal.remove();
+    });
+  }
+  
+  modal.querySelector('.delete-project').addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this project?')) {
+      deleteProject(project.id);
+      modal.remove();
+    }
+  });
+}
+
+/**
+ * Handle project form submission
+ * @param {Event} e - Form submit event
+ */
+function handleProjectSubmit(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const title = form.querySelector('#projectTitle').value;
+  const description = form.querySelector('#projectDescription').value;
+  const difficulty = form.querySelector('#projectDifficulty').value;
+  
+  const newProject = {
+    id: `project-${Date.now()}`,
+    title,
+    description,
+    difficulty,
+    xp: difficulty === 'beginner' ? 200 : difficulty === 'intermediate' ? 300 : 400,
+    completed: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  STATE.userProjects.push(newProject);
+  saveUserProjects();
+  updateProjectsGrid();
+  
+  // Reset form
+  form.reset();
+  
+  // Show success message
+  showNotification('Project created successfully!', 'success');
+}
+
+/**
+ * Save project notes
+ * @param {string} projectId - Project ID
+ * @param {string} notes - Project notes
+ */
+function saveProjectNotes(projectId, notes) {
+  const project = STATE.userProjects.find(p => p.id === projectId);
+  if (project) {
+    project.notes = notes;
+    saveUserProjects();
+  }
+}
+
+/**
+ * Complete a project
+ * @param {string} projectId - Project ID to complete
+ */
+function completeProject(projectId) {
+  // Check if it's a predefined project
+  if (projectId.includes('-project-')) {
+    if (!STATE.completedProjects.includes(projectId)) {
+      STATE.completedProjects.push(projectId);
+      
+      // Find the project to get XP value
+      const algorithmProjectMatch = projectId.match(/^(.+)-project-(\d+)$/);
+      if (algorithmProjectMatch) {
+        const algorithmId = algorithmProjectMatch[1];
+        const projectIndex = parseInt(algorithmProjectMatch[2]);
+        const algorithm = ALGORITHMS.find(a => a.id === algorithmId);
+        
+        if (algorithm && algorithm.projects[projectIndex]) {
+          updateXp(algorithm.projects[projectIndex].xp);
+        }
+      }
+      
+      saveUserProgress();
+      updateProjectsGrid();
+      showNotification('Project completed! XP earned.', 'success');
+    }
+  } else {
+    // It's a user project
+    const project = STATE.userProjects.find(p => p.id === projectId);
+    if (project && !project.completed) {
+      project.completed = true;
+      updateXp(project.xp || 200);
+      saveUserProjects();
+      updateProjectsGrid();
+      showNotification('Project completed! XP earned.', 'success');
+    }
+  }
+}
+
+/**
+ * Delete a project
+ * @param {string} projectId - Project ID to delete
+ */
+function deleteProject(projectId) {
+  STATE.userProjects = STATE.userProjects.filter(p => p.id !== projectId);
+  saveUserProjects();
+  updateProjectsGrid();
+}
+
+/**
+ * Save user projects to local storage
+ */
+function saveUserProjects() {
+  localStorage.setItem(CONFIG.storageKeys.userProjects, JSON.stringify(STATE.userProjects));
+}
+
+// =============================================
+// SECTION: Quiz & Progress Tracking
+// =============================================
+
+/**
+ * Handle quiz submission
+ * @param {Event} e - Click event
+ */
+function handleQuizSubmit(e) {
+  const quizContainer = e.target.closest('.quiz-container');
+  const questions = quizContainer.querySelectorAll('.question-card');
+  let correctAnswers = 0;
+  let totalQuestions = questions.length;
+  
+  // Validate each question
+  questions.forEach((question, index) => {
+    const selectedOption = question.querySelector('input[type="radio"]:checked');
+    const questionNumber = index + 1;
+    
+    if (selectedOption) {
+      const isCorrect = selectedOption.getAttribute('data-correct') === "true";
+      
+      if (isCorrect) {
+        correctAnswers++;
+        selectedOption.parentElement.classList.add('correct');
+      } else {
+        selectedOption.parentElement.classList.add('incorrect');
+        // Highlight correct answer
+        question.querySelector('input[type="radio"][data-correct="true"]')
+          .parentElement.classList.add('correct');
+      }
+    } else {
+      // No answer selected
+      question.classList.add('unanswered');
+    }
+  });
+  
+  // Calculate score
+  const score = Math.round((correctAnswers / totalQuestions) * 100);
+  const algorithm = STATE.currentAlgorithm;
+  
+  // Update progress
+  updateQuizProgress(algorithm, score);
+  
+  // Show results
+  showQuizResults(quizContainer, score, correctAnswers, totalQuestions);
+  
+  // Disable further answers
+  quizContainer.querySelectorAll('input[type="radio"]').forEach((input) => {
+    input.disabled = true;
+  });
+  
+  // Update XP and level
+  updateXp(score * 2); // More points for better scores
+}
+
+/**
+ * Show quiz results
+ * @param {HTMLElement} container - Quiz container
+ * @param {number} score - Quiz score percentage
+ * @param {number} correct - Number of correct answers
+ * @param {number} total - Total number of questions
+ */
+function showQuizResults(container, score, correct, total) {
+  // Remove existing results if present
+  const existingResults = container.querySelector('.quiz-results');
+  if (existingResults) existingResults.remove();
+  
+  const resultsElement = document.createElement('div');
+  resultsElement.className = 'quiz-results';
+  
+  // Determine result message
+  let resultMessage = '';
+  if (score >= 90) {
+    resultMessage = 'Excellent! You\'ve mastered this concept.';
+  } else if (score >= 70) {
+    resultMessage = 'Good job! You understand the main concepts.';
+  } else if (score >= 50) {
+    resultMessage = 'Not bad! Review the material and try again.';
+  } else {
+    resultMessage = 'Keep practicing! Review the algorithm details.';
+  }
+  
+  resultsElement.innerHTML = `
+    <h4>Quiz Results: ${score}%</h4>
+    <p>You answered ${correct} out of ${total} questions correctly</p>
+    <div class="quiz-result-message ${score >= 70 ? 'success' : 'info'}">
+      ${resultMessage}
+    </div>
+    ${score >= 70 ? '<div class="quiz-badge"><i class="fas fa-trophy"></i> Algorithm Mastered</div>' : ''}
+  `;
+  
+  container.appendChild(resultsElement);
+  
+  // Scroll to results
+  setTimeout(() => {
+    resultsElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+/**
+ * Reset quiz to initial state
+ * @param {Event} e - Click event
+ */
+function resetQuiz(e) {
+  const quizContainer = e.target.closest('.quiz-container');
+  
+  // Remove results if present
+  const results = quizContainer.querySelector('.quiz-results');
+  if (results) results.remove();
+  
+  // Reset all questions
+  quizContainer.querySelectorAll('.question-card').forEach((question) => {
+    question.classList.remove('unanswered');
+    question.querySelectorAll('.option').forEach((option) => {
+      option.classList.remove('correct', 'incorrect');
+    });
+  });
+  
+  // Clear selections and re-enable
+  quizContainer.querySelectorAll('input[type="radio"]').forEach((input) => {
+    input.checked = false;
+    input.disabled = false;
+  });
+}
+
+/**
+ * Update quiz progress for an algorithm
+ * @param {string} algorithm - Algorithm ID
+ * @param {number} score - Quiz score
+ */
+function updateQuizProgress(algorithm, score) {
+  if (!STATE.quizProgress[algorithm] || score > STATE.quizProgress[algorithm].score) {
+    STATE.quizProgress[algorithm] = {
+      score: score,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Update streak
+    const today = new Date().toDateString();
+    if (score >= 70) {
+      if (STATE.streakDate !== today) {
+        STATE.streak++;
+        STATE.streakDate = today;
+        checkStreakAchievement();
+      }
+    } else {
+      STATE.streak = 0;
+      STATE.streakDate = null;
+    }
+    
+    // Save progress
+    saveUserProgress();
+    updateRoadmapProgress();
+  }
+}
+
+/**
+ * Update user XP
+ * @param {number} points - XP points to add
+ */
+function updateXp(points) {
+  STATE.xp += points;
+  
+  // Check for level up
+  const xpNeeded = STATE.level * CONFIG.xpValues.levelMultiplier;
+  if (STATE.xp >= xpNeeded) {
+    STATE.level++;
+    STATE.xp = STATE.xp - xpNeeded;
+    showLevelUpNotification();
+  }
+  
+  // Update UI
+  updateXpBar();
+  saveUserProgress();
+}
+
+/**
+ * Show level up notification
+ */
+function showLevelUpNotification() {
+  const notification = document.createElement('div');
+  notification.className = 'level-up-notification';
+  notification.innerHTML = `
+    <div class="notification-content">
+      <div class="level-up-icon">
+        <i class="fas fa-trophy"></i>
+      </div>
+      <h3>Level Up!</h3>
+      <p>You've reached level ${STATE.level}</p>
+      <div class="xp-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <span>0/${STATE.level * CONFIG.xpValues.levelMultiplier} XP</span>
+      </div>
+      <button class="btn-primary close-notification">Continue Learning</button>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Animate progress bar
+  setTimeout(() => {
+    const progressFill = notification.querySelector('.progress-fill');
+    const percentage = (STATE.xp / (STATE.level * CONFIG.xpValues.levelMultiplier)) * 100;
+    progressFill.style.width = `${percentage}%`;
+  }, 100);
+  
+  // Close button
+  notification.querySelector('.close-notification').addEventListener('click', () => {
+    notification.classList.add('fade-out');
+    setTimeout(() => notification.remove(), 300);
+  });
+  
+  // Auto-close after 5 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.classList.add('fade-out');
+      setTimeout(() => notification.remove(), 300);
+    }
+  }, 5000);
+}
+
+// =============================================
+// SECTION: User Data & Progress
+// =============================================
+
+/**
+ * Load user data from local storage
+ */
+function loadUserData() {
+  // Load progress
+  const savedProgress = localStorage.getItem(CONFIG.storageKeys.progress);
+  if (savedProgress) {
+    try {
+      const progress = JSON.parse(savedProgress);
+      STATE.quizProgress = progress.quizProgress || {};
+      STATE.xp = progress.xp || 0;
+      STATE.level = progress.level || 1;
+      STATE.streak = progress.streak || 0;
+      STATE.streakDate = progress.streakDate || null;
+      STATE.completedAlgorithms = progress.completedAlgorithms || [];
+      STATE.completedProjects = progress.completedProjects || [];
+    } catch (e) {
+      console.error('Failed to parse progress data', e);
+    }
+  }
+  
+  // Load achievements
+  const savedAchievements = localStorage.getItem(CONFIG.storageKeys.achievements);
+  if (savedAchievements) {
+    try {
+      STATE.userAchievements = JSON.parse(savedAchievements);
+    } catch (e) {
+      console.error('Failed to parse achievements data', e);
+    }
+  }
+  
+  // Load theme
+  const savedTheme = localStorage.getItem(CONFIG.storageKeys.theme);
+  if (savedTheme) {
+    STATE.currentTheme = savedTheme;
+    applyTheme(savedTheme);
+  }
+  
+  // Load dark mode preference
+  const savedDarkMode = localStorage.getItem('darkMode');
+  if (savedDarkMode) {
+    STATE.isDarkMode = savedDarkMode === 'true';
+    toggleDarkMode(STATE.isDarkMode);
+  }
+  
+  // Update UI
+  updateXpBar();
+  updateRoadmapProgress();
+}
+
+/**
+ * Save user progress to local storage
+ */
+function saveUserProgress() {
+  const progressData = {
+    quizProgress: STATE.quizProgress,
+    xp: STATE.xp,
+    level: STATE.level,
+    streak: STATE.streak,
+    streakDate: STATE.streakDate,
+    completedAlgorithms: STATE.completedAlgorithms,
+    completedProjects: STATE.completedProjects,
+    timestamp: new Date().toISOString()
+  };
+  
+  localStorage.setItem(CONFIG.storageKeys.progress, JSON.stringify(progressData));
+  localStorage.setItem(CONFIG.storageKeys.achievements, JSON.stringify(STATE.userAchievements));
+  localStorage.setItem(CONFIG.storageKeys.theme, STATE.currentTheme);
+  localStorage.setItem('darkMode', STATE.isDarkMode);
+}
+
+/**
+ * Update XP bar in UI
+ */
+function updateXpBar() {
+  const xpBar = document.querySelector('.xp-bar');
+  if (!xpBar) return;
+  
+  const xpNeeded = STATE.level * CONFIG.xpValues.levelMultiplier;
+  const percentage = Math.min(100, (STATE.xp / xpNeeded) * 100);
+  
+  xpBar.querySelector('.xp-fill').style.width = `${percentage}%`;
+  xpBar.querySelector('.xp-text').textContent = `Level ${STATE.level} | ${STATE.xp}/${xpNeeded} XP`;
+  
+  // Update level indicator
+  const levelIndicator = xpBar.querySelector('.level-indicator');
+  if (levelIndicator) {
+    levelIndicator.textContent = STATE.level;
+  }
+}
+
+/**
+ * Update roadmap progress indicators
+ */
+function updateRoadmapProgress() {
+  DOM.timelineItems.forEach((item) => {
+    const algorithmItems = item.querySelectorAll('.item-algorithms li[data-algorithm]');
+    let completed = 0;
+    
+    algorithmItems.forEach((li) => {
+      const algorithm = li.dataset.algorithm;
+      if (STATE.quizProgress[algorithm] && STATE.quizProgress[algorithm].score >= 70) {
+        completed++;
+        li.querySelector('i').className = 'fas fa-check-circle';
+        li.classList.add('completed');
+      } else {
+        li.querySelector('i').className = 'far fa-circle';
+        li.classList.remove('completed');
+      }
+    });
+    
+    const total = algorithmItems.length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    const progressText = item.querySelector('.progress-text');
+    const progressBar = item.querySelector('.progress-fill');
+    
+    if (progressText && progressBar) {
+      progressText.textContent = `${completed} of ${total} completed`;
+      progressBar.style.width = `${percentage}%`;
+    }
+  });
+}
+
+/**
+ * Track algorithm view for progress
+ * @param {string} algorithmId - Algorithm ID
+ */
+function trackAlgorithmView(algorithmId) {
+  if (!STATE.completedAlgorithms.includes(algorithmId)) {
+    STATE.completedAlgorithms.push(algorithmId);
+    updateXp(CONFIG.xpValues.algorithmView);
+    saveUserProgress();
+  }
+}
+
+
+/**
+ * Check for streak achievements
+ */
+function checkStreakAchievement() {
+  const streakMilestones = [3, 5, 7, 10, 14, 21, 30];
+  
+  streakMilestones.forEach((milestone) => {
+    if (STATE.streak === milestone && !STATE.userAchievements.includes(`Streak ${milestone}`)) {
+      STATE.userAchievements.push(`Streak ${milestone}`);
+      showAchievementNotification(`Streak ${milestone}`, `Completed ${milestone} quizzes in a row!`);
+      saveUserProgress();
+    }
+  });
+}
+
+/**
+ * Show achievement notification
+ * @param {string} title - Achievement title
+ * @param {string} description - Achievement description
+ */
+function showAchievementNotification(title, description) {
+  const notification = document.createElement('div');
+  notification.className = 'achievement-notification';
+  notification.innerHTML = `
+    <div class="notification-content">
+      <div class="achievement-icon">
+        <i class="fas fa-trophy"></i>
+      </div>
+      <h3>Achievement Unlocked!</h3>
+      <h4>${title}</h4>
+      <p>${description}</p>
+      <button class="btn-primary close-notification">Awesome!</button>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  notification.querySelector('.close-notification').addEventListener('click', () => {
+    notification.remove();
+  });
+  
+  // Auto-close after 5 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+/**
+ * Show general notification
+ * @param {string} message - Notification message
+ * @param {string} type - Notification type (success, error, info)
+ */
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <p>${message}</p>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.add('fade-out');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// =============================================
+// SECTION: UI & Theme Management
+// =============================================
+
+/**
+ * Initialize theme and UI settings
+ */
+function initUI() {
+  // Check for saved theme preference
+  const savedTheme = localStorage.getItem(CONFIG.storageKeys.theme);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else if (prefersDark) {
+    toggleDarkMode(true);
+  }
+  
+  // Initialize animations
+  initAnimations();
+}
+
+/**
+ * Apply selected theme
+ * @param {string} themeName - Theme name to apply
+ */
+function applyTheme(themeName) {
+  if (!CONFIG.colorThemes[themeName]) {
+    console.warn(`Theme ${themeName} not found, using default`);
+    themeName = 'default';
+  }
+  
+  STATE.currentTheme = themeName;
+  localStorage.setItem(CONFIG.storageKeys.theme, themeName);
+  
+  const theme = CONFIG.colorThemes[themeName];
+  
+  // Apply CSS variables
+  document.documentElement.style.setProperty('--primary', theme.primary);
+  document.documentElement.style.setProperty('--secondary', theme.secondary);
+  document.documentElement.style.setProperty('--accent', theme.accent);
+  document.documentElement.style.setProperty('--text', theme.text);
+  document.documentElement.style.setProperty('--background', theme.background);
+  
+  // Update UI elements
+  document.querySelectorAll('.neon-logo, .logo-svg').forEach((el) => {
+    el.style.textShadow = `0 0 10px ${theme.accent}, 0 0 20px ${theme.accent}, 0 0 30px ${theme.accent}`;
+  });
+  
+  // Special handling for terminal theme
+  if (themeName === 'terminal') {
+    document.body.classList.add('terminal-mode');
+  } else {
+    document.body.classList.remove('terminal-mode');
+  }
+}
+
+/**
+ * Cycle through available themes
+ */
+function cycleTheme() {
+  const themeNames = Object.keys(CONFIG.colorThemes);
+  const currentIndex = themeNames.indexOf(STATE.currentTheme);
+  const nextIndex = (currentIndex + 1) % themeNames.length;
+  
+  applyTheme(themeNames[nextIndex]);
+}
+
+/**
+ * Toggle dark mode
+ * @param {boolean} [forceState] - Optional forced state
+ */
+function toggleDarkMode(forceState) {
+  STATE.isDarkMode = forceState !== undefined ? forceState : !STATE.isDarkMode;
+  
+  if (STATE.isDarkMode) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+  
+  localStorage.setItem('darkMode', STATE.isDarkMode);
 }
 
 // =============================================
