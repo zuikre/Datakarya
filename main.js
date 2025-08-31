@@ -1056,6 +1056,13 @@ function closeAlgorithmDetail() {
   if (typeof window.cleanupVisualizer === 'function') {
     window.cleanupVisualizer();
   }
+
+  // Also clean up fullscreen functionality
+  if (window.cleanupVisualizers && window.cleanupVisualizers[STATE.currentAlgorithm]) {
+    window.cleanupVisualizers[STATE.currentAlgorithm]();
+    delete window.cleanupVisualizers[STATE.currentAlgorithm];
+  }
+
 }
 
 
@@ -1695,42 +1702,119 @@ function generateCodeTab(algorithm) {
   `;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Expand (zoom) button logic
-  document.querySelectorAll(".expand-code").forEach(button => {
-    button.addEventListener("click", () => {
-      const container = button.closest(".code-container");
-      const modalOverlay = container.querySelector(".code-modal-overlay");
-      const modalContent = modalOverlay.querySelector(".modal-content");
+// Robust expand/zoom for code tabs (works with dynamically injected tabs)
+(() => {
+  const SELECTORS = {
+    container: '.code-container',
+    expandBtn: '.expand-code',
+    activeBlock: '.code-block.active, .code-pane.active, pre.code-block.active, pre.code-pane.active',
+    anyBlock: '.code-block, .code-pane, pre.code-block, pre.code-pane',
+    overlay: '.code-modal-overlay',
+    modal: '.code-modal',
+    modalContent: '.modal-content',
+    modalClose: '.modal-close'
+  };
 
-      // Clone the currently active code block
-      const activeBlock = container.querySelector(".code-block.active");
-      if (activeBlock) {
-        modalContent.innerHTML = activeBlock.outerHTML;
-      }
+  function findContainer(el) {
+    return el.closest(SELECTORS.container);
+  }
 
-      // Show modal
-      modalOverlay.classList.add("active");
-    });
-  });
+  function getActiveBlock(container) {
+    return (
+      container.querySelector(SELECTORS.activeBlock) ||
+      container.querySelector(SELECTORS.anyBlock)
+    );
+  }
 
-  // Close modal logic
-  document.querySelectorAll(".code-modal-overlay").forEach(overlay => {
-    const closeBtn = overlay.querySelector(".modal-close");
+  function ensureOverlay(container) {
+    let overlay = container.querySelector(SELECTORS.overlay);
+    if (!overlay) {
+      // Safety: create modal if your template wasn't included for some reason
+      overlay = document.createElement('div');
+      overlay.className = 'code-modal-overlay';
+      overlay.innerHTML = `
+        <div class="code-modal">
+          <div class="modal-header">
+            <h4>Full Screen Code View</h4>
+            <button class="modal-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-content"></div>
+        </div>
+      `;
+      container.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  function openModal(container) {
+    const overlay = ensureOverlay(container);
+    const content = overlay.querySelector(SELECTORS.modalContent);
+    const active = getActiveBlock(container);
+
+    if (!active) {
+      console.warn('[code expand] No code block found to expand.');
+      return;
+    }
+
+    // Clone the active block so we don't move it out of the tab
+    const clone = active.cloneNode(true);
+    // Make sure it's visible inside the modal regardless of tab state
+    clone.classList.add('active');
+
+    // Insert & (optionally) re-highlight
+    content.innerHTML = '';
+    content.appendChild(clone);
+
+    // If Prism is available, re-highlight inside modal
+    if (window.Prism) {
+      content.querySelectorAll('code').forEach((el) => {
+        try { Prism.highlightElement(el); } catch {}
+      });
+    }
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; // prevent background scroll
+  }
+
+  function closeModal(overlay) {
+    overlay.classList.remove('active');
+    const content = overlay.querySelector(SELECTORS.modalContent);
+    if (content) content.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  // Event delegation for clicks
+  document.addEventListener('click', (e) => {
+    // Open
+    const expandBtn = e.target.closest(SELECTORS.expandBtn);
+    if (expandBtn) {
+      e.preventDefault();
+      const container = findContainer(expandBtn);
+      if (container) openModal(container);
+      return;
+    }
 
     // Close on ✖ button
-    closeBtn.addEventListener("click", () => {
-      overlay.classList.remove("active");
-    });
+    const closeBtn = e.target.closest(SELECTORS.modalClose);
+    if (closeBtn) {
+      const overlay = closeBtn.closest(SELECTORS.overlay);
+      if (overlay) closeModal(overlay);
+      return;
+    }
 
-    // Close on clicking outside modal
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) {
-        overlay.classList.remove("active");
-      }
-    });
+    // Close on overlay click (but not when clicking inside the modal)
+    const overlay = e.target.classList?.contains('code-modal-overlay') ? e.target : null;
+    if (overlay) closeModal(overlay);
   });
-});
+
+  // Close on ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll(`${SELECTORS.overlay}.active`).forEach(closeModal);
+    }
+  });
+})();
+
 
 // Clipboard copy logic
 document.addEventListener('click', function (e) {
@@ -1769,34 +1853,32 @@ document.addEventListener('click', function (e) {
 
 function generateVisualizationTab(algorithm) {
   const visualization = algorithm.visualization || {};
-  
-  // Default visualization parameters from visualization.js
+
   const defaultParams = {
     interactive: true,
     show_grid: true,
     show_axes: true,
     animation_duration: 1500
   };
-  
-  // Merge with algorithm-specific visualization parameters
+
   const visualizationParams = {
     ...defaultParams,
     ...(visualization.parameters || {})
   };
-  
+
   return `
     <div class="tab-pane" id="visualization-tab">
       <div class="visualization-container">
-        <!-- Dynamic controls container - will be populated by the visualizer -->
+
+        <!-- Dynamic controls -->
         <div class="visualization-controls-dynamic" id="${algorithm.id}-controls">
-          <!-- Loading message for controls -->
           <div class="controls-loading">
             <i class="fas fa-spinner fa-spin"></i>
             <p>Loading interactive controls...</p>
           </div>
         </div>
 
-        <!-- Visualization canvas - will be populated by the visualizer -->
+        <!-- Visualization canvas -->
         <div class="visualization-canvas" id="${algorithm.id}-visualization">
           <div class="visualization-loading">
             <i class="fas fa-spinner fa-spin"></i>
@@ -1804,7 +1886,7 @@ function generateVisualizationTab(algorithm) {
           </div>
         </div>
 
-        <!-- Common action buttons for all visualizations -->
+        <!-- Action buttons -->
         <div class="visualization-actions">
           <div class="action-buttons">
             <button class="btn-secondary reset-visualization" data-algorithm="${algorithm.id}">
@@ -1813,50 +1895,44 @@ function generateVisualizationTab(algorithm) {
             <button class="btn-primary animate-visualization" data-algorithm="${algorithm.id}">
               <i class="fas fa-play"></i> Restart Animation
             </button>
-            
-            <!-- Dynamic visualization type selector if multiple types are available -->
+
             ${visualization.types && visualization.types.length > 1 ? `
               <select class="visualization-type-selector" data-algorithm="${algorithm.id}">
                 ${visualization.types.map(type => `
-                  <option value="${type.value}" ${type.default ? 'selected' : ''}>
-                    ${type.label}
-                  </option>
+                  <option value="${type.value}" ${type.default ? 'selected' : ''}>${type.label}</option>
                 `).join('')}
               </select>
             ` : ''}
-            
-            <!-- Toggle buttons for common visualization features -->
+
             <div class="visualization-toggles">
               <button class="btn-toggle ${visualizationParams.show_grid ? 'active' : ''}" 
-                data-algorithm="${algorithm.id}" data-param="show_grid" 
-                title="Toggle Grid">
+                data-algorithm="${algorithm.id}" data-param="show_grid" title="Toggle Grid">
                 <i class="fas fa-border-style"></i>
               </button>
               <button class="btn-toggle ${visualizationParams.show_axes ? 'active' : ''}" 
-                data-algorithm="${algorithm.id}" data-param="show_axes" 
-                title="Toggle Axes">
+                data-algorithm="${algorithm.id}" data-param="show_axes" title="Toggle Axes">
                 <i class="fas fa-crosshairs"></i>
               </button>
             </div>
           </div>
         </div>
-        
-        <!-- Information section with description and instructions -->
+
+        <!-- Visualization info -->
         <div class="visualization-info">
           <div class="visualization-description">
             <h4>${algorithm.title} Visualization</h4>
             <p>${visualization.description || `Interact with the visualization to understand how ${algorithm.title} works.`}</p>
           </div>
-          
+
           ${visualization.instructions ? `
             <div class="visualization-instructions">
               <h5><i class="fas fa-lightbulb"></i> How to Use:</h5>
               <ul>
-                ${visualization.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                ${visualization.instructions.map(ins => `<li>${ins}</li>`).join('')}
               </ul>
             </div>
           ` : ''}
-          
+
           ${visualization.performanceTips ? `
             <div class="visualization-tips">
               <h5><i class="fas fa-info-circle"></i> Performance Tips:</h5>
@@ -1865,23 +1941,23 @@ function generateVisualizationTab(algorithm) {
               </ul>
             </div>
           ` : ''}
-          
-          <!-- Dynamic parameters display -->
+
           <div class="visualization-parameters">
             <h5><i class="fas fa-sliders-h"></i> Current Parameters:</h5>
-            <div id="${algorithm.id}-params-display">
-              <!-- Will be populated with current parameters by the visualizer -->
-            </div>
+            <div id="${algorithm.id}-params-display"></div>
           </div>
         </div>
+
       </div>
     </div>
   `;
 }
 
-// Enhanced initVisualizer function
+
+/**
+ * Initialize visualizer
+ */
 window.initVisualizer = function(algorithmId) {
-  // Add safety check for undefined algorithmId
   if (!algorithmId) {
     console.warn('initVisualizer called without algorithm ID');
     return;
@@ -1908,8 +1984,8 @@ window.initVisualizer = function(algorithmId) {
   const visualizationType = visualization.defaultType || 'default';
   const params = {
     ...visualization.parameters,
-    interactive: true, // Always enable interactive mode
-    controlsContainer: controlsContainerId // Tell visualizer where to put controls
+    interactive: true,
+    controlsContainer: controlsContainerId
   };
   
   // Get the visualizer function using the visualizerKey
@@ -1928,7 +2004,9 @@ window.initVisualizer = function(algorithmId) {
   }
 };
 
-// Enhanced event handler setup
+/**
+ * Setup visualization event handlers
+ */
 function setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, containerId, baseParams) {
   const visualization = algorithm.visualization;
   
@@ -1981,7 +2059,9 @@ function setupVisualizationEventHandlers(algorithmId, algorithm, visualizerFn, c
   }
 }
 
-// Helper function to get current visualization parameters
+/**
+ * Helper function to get current visualization parameters
+ */
 function getCurrentVisualizationParams(algorithmId, baseParams) {
   // This would extract current values from the dynamic controls
   // For now, return the base params
@@ -1991,13 +2071,17 @@ function getCurrentVisualizationParams(algorithmId, baseParams) {
   };
 }
 
-// Helper function to get current visualization type
+/**
+ * Helper function to get current visualization type
+ */
 function getCurrentVisualizationType(algorithmId, visualization) {
   const typeSelector = document.querySelector(`.visualization-type-selector[data-algorithm="${algorithmId}"]`);
   return typeSelector ? typeSelector.value : visualization.defaultType;
 }
 
-// Enhanced error display
+/**
+ * Show visualization error
+ */
 function showVisualizationError(containerId, message) {
   const container = document.getElementById(containerId);
   if (container) {
@@ -2016,7 +2100,9 @@ function showVisualizationError(containerId, message) {
   }
 }
 
-// Function to initialize all visualizations (if needed)
+/**
+ * Initialize visualization
+ */
 function initializeVisualization(algorithmId) {
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {
@@ -2027,6 +2113,7 @@ function initializeVisualization(algorithmId) {
     setTimeout(() => initVisualizer(algorithmId), 100);
   }
 }
+
 
 /**
  * Generate pros & cons tab content
@@ -2089,28 +2176,36 @@ function generateProsConsTab(algorithm) {
  * @return {string} - Generated HTML
  */
 function generateUsesTab(algorithm) {
+  const useCases = algorithm.useCases || [];
+
   return `
     <div class="tab-pane" id="uses-tab">
       <div class="uses-container">
-        <h4>Real-world Applications</h4>
-        
-        ${algorithm.useCases.map(useCase => `
-        <div class="use-case-card">
-          <div class="use-case-icon">
-            <i class="fas fa-rocket"></i>
-          </div>
-          <div class="use-case-content">
-            <h5>${useCase.title}</h5>
-            <p>${useCase.description}</p>
-            ${useCase.dataset ? `
-            <div class="use-case-dataset">
-              <i class="fas fa-database"></i> Dataset: ${useCase.dataset}
+        <h4 class="uses-title">Real-world Applications</h4>
+
+        ${useCases.length > 0 ? useCases.map(useCase => `
+          <article class="use-case-card">
+            <div class="use-case-icon">
+              <i class="fas fa-rocket"></i>
             </div>
-            ` : ''}
-          </div>
-        </div>
-        `).join('')}
-        
+            <div class="use-case-content">
+              <h5 class="use-case-title">${useCase.title}</h5>
+              <p class="use-case-description">${useCase.description}</p>
+              ${useCase.dataset ? `
+              <div class="use-case-dataset">
+                <i class="fas fa-database"></i> 
+                Dataset: 
+                <a href="${useCase.datasetLink || '#'}" target="_blank" rel="noopener noreferrer">
+                  ${useCase.dataset}
+                </a>
+              </div>
+              ` : ''}
+            </div>
+          </article>
+        `).join('') : `
+          <p class="no-use-cases">No use cases available for this algorithm.</p>
+        `}
+
         <div class="use-case-actions">
           <button class="btn-secondary">
             <i class="fas fa-book"></i> Read Case Studies
@@ -2123,6 +2218,7 @@ function generateUsesTab(algorithm) {
     </div>
   `;
 }
+
 
 /**
  * Generate quiz tab content

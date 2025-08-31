@@ -9187,7 +9187,7 @@ function visualizeHierarchicalClustering(containerId, visualizationType, params 
         const canvasX = toCanvasX(x);
         ctx.beginPath();
         ctx.moveTo(canvasX, toCanvasY(bounds.yMin));
-        ctx.lineTo(cinemaX, toCanvasY(bounds.yMax));
+        ctx.lineTo(toCanvasX(value), toCanvasY(value));
         ctx.stroke();
       }
       

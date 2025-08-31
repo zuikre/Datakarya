@@ -261,19 +261,22 @@ const ALGORITHMS = [
       }
     ],
     
-    // Use cases
+    // Use cases with dataset links
     useCases: [
       {
         title: 'Real Estate Pricing',
         description: 'Predicting house prices based on features like square footage, number of bedrooms, and location.',
-        dataset: 'Boston Housing Prices'
+        dataset: 'Boston Housing Prices',
+        datasetLink: 'https://www.kaggle.com/datasets/vikrishnan/boston-house-prices'
       },
       {
         title: 'Sales Forecasting',
         description: 'Estimating future sales based on advertising spend across different channels.',
-        dataset: 'Advertising Budget'
+        dataset: 'Advertising Budget',
+        datasetLink: 'https://www.kaggle.com/datasets/yasserh/advertising-sales-dataset'
       }
     ],
+
     
     // Comparison data
     comparisons: [
