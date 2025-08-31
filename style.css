@@ -2162,7 +2162,7 @@ code {
   display: none; /* hidden by default */
   justify-content: center;
   align-items: flex-start;  /* start from top */
-  padding-top: 8vh;         /* push modal slightly down */
+  padding-top: 14vh;         /* push modal slightly down */
   box-sizing: border-box;
   z-index: 9999;
   overflow-y: auto;         /* allow scroll if modal taller than viewport */
