@@ -57,19 +57,19 @@ With **DataKarya**, users can:
 
 To set up **DataKarya** on your local machine:
 
-1. **Clone the repository**:
+- **Clone the repository**:
 
 ```bash
    git clone https://github.com/zuikre/datakarya.git
 ````
 
-2. **Navigate to the folder** containing the `index.html` file:
+- **Navigate to the folder** containing the `index.html` file:
 
 ```bash
    cd datakarya
 ```
 
-3. **Open `index.html` in your preferred browser**. No server or database setup is required, as the platform is fully static and can run directly from your local file system.
+- **Open `index.html` in your preferred browser**. No server or database setup is required, as the platform is fully static and can run directly from your local file system.
 
    For local development or customization, simply edit the files directly.
 

@@ -139,10 +139,14 @@ const DOM = {
   menuToggle: null,
   navLinks: null,
   navLinksList: null,
+  mobileOverlay: null,
   
   // Search elements
   searchInput: null,
   searchBtn: null,
+  desktopSearchContainer: null,
+  mobileSearchToggle: null,
+  mobileSearchContainer: null,
   
   // Algorithm elements
   algorithmGrid: null,
@@ -284,11 +288,15 @@ function initializeDOMReferences() {
   DOM.menuToggle = document.querySelector('.menu-toggle');
   DOM.navLinks = document.querySelector('.nav-links');
   DOM.navLinksList = document.querySelector('.nav-links ul');
+  DOM.mobileOverlay = document.querySelector('.mobile-overlay');
   
   // Search elements
   DOM.searchInput = document.querySelector('.search-input');
   DOM.searchBtn = document.querySelector('.search-btn');
-  
+  DOM.desktopSearchContainer = document.querySelector('.search-container');
+  DOM.mobileSearchToggle = document.querySelector('.mobile-search-toggle');
+  DOM.mobileSearchContainer = document.querySelector('.mobile-search-container');
+
   // Algorithm elements
   DOM.algorithmGrid = document.getElementById('algorithmGrid');
   DOM.algorithmCards = document.querySelectorAll('.algorithm-card');
@@ -470,12 +478,10 @@ function initNavigationEvents() {
     });
   }
   
-  // Document click handler for closing menu
-  document.addEventListener('click', (e) => {
-    if (STATE.isMenuOpen && !e.target.closest('.navbar-container')) {
-      toggleMenu(false);
-    }
-  });
+  // Close menu when clicking on overlay
+  if (DOM.mobileOverlay) {
+    DOM.mobileOverlay.addEventListener('click', () => toggleMenu(false));
+  }
 }
 
 /**
@@ -495,6 +501,13 @@ function initSearchEvents() {
         DOM.searchInput.value = '';
         handleSearch();
       }
+    });
+  }
+
+  // Mobile search toggle
+  if (DOM.mobileSearchToggle && DOM.mobileSearchContainer) {
+    DOM.mobileSearchToggle.addEventListener('click', () => {
+      DOM.mobileSearchContainer.classList.toggle('active');
     });
   }
 }
@@ -902,16 +915,23 @@ function initUIEvents() {
  */
 function toggleMenu(forceState) {
   STATE.isMenuOpen = forceState !== undefined ? forceState : !STATE.isMenuOpen;
-  
-  if (STATE.isMenuOpen) {
-    DOM.navLinks.classList.add('active');
-    DOM.menuToggle.innerHTML = '<i class="fas fa-times"></i>';
-    document.body.style.overflow = 'hidden';
-  } else {
-    DOM.navLinks.classList.remove('active');
-    DOM.menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-    document.body.style.overflow = '';
+
+  // Use classList.toggle with the force parameter for cleaner state management
+  document.body.classList.toggle('menu-open', STATE.isMenuOpen);
+
+  if (DOM.menuToggle) {
+    DOM.menuToggle.classList.toggle('active', STATE.isMenuOpen);
+    DOM.menuToggle.innerHTML = STATE.isMenuOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
   }
+  if (DOM.navLinks) {
+    DOM.navLinks.classList.toggle('active', STATE.isMenuOpen);
+  }
+  if (DOM.mobileOverlay) {
+    DOM.mobileOverlay.classList.toggle('active', STATE.isMenuOpen);
+  }
+
+  // Prevent body scrolling when the menu is open
+  document.body.style.overflow = STATE.isMenuOpen ? 'hidden' : '';
 }
 
 /**
@@ -3786,14 +3806,6 @@ function handleScroll() {
   updateTimelineProgress();
 }
 
-// Toggle mobile menu
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinks = document.querySelector('.nav-links ul');
-
-menuToggle.addEventListener('click', () => {
-  navLinks.classList.toggle('show');
-});
-
 const canvas = document.getElementById("neural-canvas");
 const ctx = canvas.getContext("2d");
 let width = canvas.width = window.innerWidth;
@@ -3965,6 +3977,23 @@ function updateTimelineProgress() {
  * Handle window resize events
  */
 function handleResize() {
+  // Close mobile menu on larger screens to prevent it from staying open
+  if (window.innerWidth > 992 && STATE.isMenuOpen) {
+    toggleMenu(false);
+  }
+
+  // Toggle visibility of desktop vs mobile search based on screen size.
+  // Note: This is often better handled with CSS media queries.
+  if (DOM.desktopSearchContainer) {
+    const isMobileView = window.innerWidth <= 576;
+    DOM.desktopSearchContainer.style.display = isMobileView ? 'none' : 'flex';
+
+    if (!isMobileView && DOM.mobileSearchContainer) {
+      // Hide mobile search if it was open when resizing up
+      DOM.mobileSearchContainer.classList.remove('active');
+    }
+  }
+
   updateSectionVisibility();
   updateTimelineProgress();
 }
@@ -4152,206 +4181,6 @@ setTimeout(() => {
     initializeApp();
   }
 }, CONFIG.maxPreloaderTimeout);
-
-// Contact Form Functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const contactForm = document.getElementById('contactForm');
-  const formFields = contactForm ? contactForm.querySelectorAll('input, textarea, select') : [];
-  const submitBtn = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
-
-  // Initialize form events if form exists
-  if (contactForm) {
-    // Add event listeners to all form fields
-    formFields.forEach(field => {
-      field.addEventListener('blur', validateField);
-      field.addEventListener('input', clearFieldError);
-    });
-
-    // Form submission handler
-    contactForm.addEventListener('submit', handleFormSubmit);
-
-    // Disable submit button initially if form is invalid
-    if (submitBtn) {
-      submitBtn.disabled = !contactForm.checkValidity();
-    }
-  }
-
-  /**
-   * Validates a single form field
-   * @param {Event} e - The blur event
-   */
-  function validateField(e) {
-    const field = e.target;
-    const fieldValue = field.value.trim();
-    const fieldName = field.name || field.id;
-    const errorElement = field.nextElementSibling;
-
-    // Clear any existing error classes
-    field.classList.remove('error');
-
-    // Skip validation for select elements on blur
-    if (field.tagName === 'SELECT') return;
-
-    // Validate based on field type
-    if (field.required && fieldValue === '') {
-      showError(field, `${fieldName} is required`);
-      return;
-    }
-
-    if (field.type === 'email' && !isValidEmail(fieldValue)) {
-      showError(field, 'Please enter a valid email address');
-      return;
-    }
-
-    if (field.id === 'message' && fieldValue.length < 10) {
-      showError(field, 'Message should be at least 10 characters long');
-      return;
-    }
-  }
-
-  /**
-   * Shows error message for a field
-   * @param {HTMLElement} field - The form field
-   * @param {string} message - The error message
-   */
-  function showError(field, message) {
-    // Add error class to field
-    field.classList.add('error');
-
-    // Create or update error message element
-    let errorElement = field.nextElementSibling;
-    if (!errorElement || !errorElement.classList.contains('error-message')) {
-      errorElement = document.createElement('div');
-      errorElement.className = 'error-message';
-      field.parentNode.insertBefore(errorElement, field.nextSibling);
-    }
-
-    errorElement.textContent = message;
-    updateSubmitButtonState();
-  }
-
-  /**
-   * Clears error state when user starts typing
-   * @param {Event} e - The input event
-   */
-  function clearFieldError(e) {
-    const field = e.target;
-    field.classList.remove('error');
-
-    const errorElement = field.nextElementSibling;
-    if (errorElement && errorElement.classList.contains('error-message')) {
-      errorElement.remove();
-    }
-
-    updateSubmitButtonState();
-  }
-
-  /**
-   * Updates submit button state based on form validity
-   */
-  function updateSubmitButtonState() {
-    if (submitBtn) {
-      submitBtn.disabled = !contactForm.checkValidity();
-    }
-  }
-
-  /**
-   * Handles form submission
-   * @param {Event} e - The submit event
-   */
-async function handleFormSubmit(e) {
-  e.preventDefault();
-  const form = e.target;
-  const submitBtn = form.querySelector('button[type="submit"]');
-
-  // Disable button + show loading
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-  try {
-    const response = await fetch(form.action, {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (response.ok) {
-      showFormFeedback('success', 'Message sent! I’ll reply soon.');
-      form.reset(); // Clear form
-    } else {
-      throw new Error('Failed to send');
-    }
-  } catch (error) {
-    showFormFeedback('error', 'Oops! Could not send. Try emailing me directly at roubhizakarya@gmail.com');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-  }
-}
-
-  /**
-   * Shows success/error feedback message
-   * @param {string} type - 'success' or 'error'
-   * @param {string} message - The feedback message
-   */
-  function showFormFeedback(type, message) {
-    // Remove any existing feedback messages
-    const existingFeedback = document.querySelector('.form-feedback');
-    if (existingFeedback) {
-      existingFeedback.remove();
-    }
-
-    // Create feedback element
-    const feedbackElement = document.createElement('div');
-    feedbackElement.className = `form-feedback ${type}`;
-    feedbackElement.innerHTML = `
-      <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-      <span>${message}</span>
-    `;
-
-    // Insert feedback before the form
-    contactForm.parentNode.insertBefore(feedbackElement, contactForm);
-
-    // Remove feedback after 5 seconds
-    setTimeout(() => {
-      feedbackElement.remove();
-    }, 5000);
-  }
-
-  /**
-   * Validates email format
-   * @param {string} email - The email to validate
-   * @returns {boolean} - True if email is valid
-   */
-  function isValidEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  }
-
-  /**
-   * Gets form data as an object
-   * @param {HTMLFormElement} form - The form element
-   * @returns {Object} - Form data as key-value pairs
-   */
-  function getFormData(form) {
-    const formData = new FormData(form);
-    const data = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
-    return data;
-  }
-
-  // GitHub link click handler
-  const githubLink = document.querySelector('.github-link');
-  if (githubLink) {
-    githubLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      // Replace with your actual GitHub repository URL
-      window.open('https://github.com/zuikre/Datakarya', '_blank');
-    });
-  }
-});
 
 /**
  * script.js
@@ -4716,15 +4545,3 @@ async function handleFormSubmit(e) {
   });
 
 })();
-
-const input = document.querySelector('.search-input');
-
-input.addEventListener('input', () => {
-  if (input.value.length > 0) {
-    input.style.boxShadow =
-      "0 0 18px rgba(0,255,200,0.7), 0 0 28px rgba(157,78,221,0.8)";
-  } else {
-    input.style.boxShadow =
-      "0 0 8px rgba(157,78,221,0.4), inset 0 0 4px rgba(255,255,255,0.05)";
-  }
-});
